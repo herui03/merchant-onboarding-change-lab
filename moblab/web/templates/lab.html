@@ -20,7 +20,7 @@
     </div>
     <div>
       <h2>Synthetic actors</h2>
-      <div class="table-wrap"><table>
+      <div class="table-wrap"><table class="compact">
         <thead><tr><th>Actor</th><th>Roles</th></tr></thead>
         <tbody>{% for a in actors.values() %}<tr><td>{{ a.display_name }}<div class="small muted">{{ a.title }}</div></td><td class="small">{% for r in a.roles %}{{ labels.roles.get(r, r) }}{% if not loop.last %}, {% endif %}{% endfor %}</td></tr>{% endfor %}</tbody>
       </table></div>

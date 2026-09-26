@@ -73,7 +73,22 @@ if ! "$PY" -c 'import flask' >/dev/null 2>&1; then
 fi
 echo "Python: $PY ($("$PY" -c 'import platform; print(platform.python_version())')), Flask $("$PY" -c 'import flask, importlib.metadata as m; print(m.version("flask"))')"
 
-# 2. Database: reset only on request (with backup); otherwise preserve, seeding only if missing.
+port_busy() {
+  "$PY" -c "import socket,sys; s=socket.socket(); s.settimeout(0.5); sys.exit(0 if s.connect_ex(('127.0.0.1', $PORT)) == 0 else 1)"
+}
+
+# 2. Busy-port guard BEFORE any database change (DEF-004): if the lab (or anything else) already
+#    answers on 5058, stop here without resetting or seeding. `moblab reset` additionally refuses
+#    while any server holds this database's run lock, whatever port it uses.
+if [ "$CHECK_ONLY" -eq 0 ] || [ "$RESET" -eq 1 ]; then
+  if port_busy; then
+    echo "ERROR: 127.0.0.1:$PORT is already in use. Is the lab already running? Try $URL"
+    echo "Nothing was changed: the database was not reset or seeded. Stop the other process and run this again."
+    fallback; exit 1
+  fi
+fi
+
+# 3. Database: reset only on request (with backup); otherwise preserve, seeding only if missing.
 if [ "$RESET" -eq 1 ]; then
   echo "Reset requested: backing up and reseeding."
   "$PY" -m moblab reset --db "$DB" --yes
@@ -90,13 +105,7 @@ if [ "$CHECK_ONLY" -eq 1 ]; then
   exit 0
 fi
 
-# 3. Port check (another portfolio app may use 5057/5059; this lab always uses 5058).
-if "$PY" -c "import socket,sys; s=socket.socket(); s.settimeout(0.5); sys.exit(0 if s.connect_ex(('127.0.0.1', $PORT)) == 0 else 1)"; then
-  echo "ERROR: 127.0.0.1:$PORT is already in use. Is the lab already running? Try $URL"
-  echo "Otherwise stop the other process and run this again."
-  fallback; exit 1
-fi
-
+# 4. Start (another portfolio app may use 5057/5059; this lab always uses 5058).
 echo "Starting on $URL  (Ctrl+C to stop)"
 if [ "$(uname -s)" = "Darwin" ] && [ -t 1 ]; then
   ( sleep 1.5; open "$URL" >/dev/null 2>&1 || true ) &

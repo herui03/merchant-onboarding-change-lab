@@ -464,3 +464,90 @@ def test_seed_is_reproducible(tmp_path):
     assert fp(a) == fp(b)
     with pytest.raises(FileExistsError):
         init_database(a)
+
+
+# ----------------------------------------------------------------------------- DEF-004 regression (Codex R3-03)
+def _marker(db):
+    conn = sqlite3.connect(db)
+    try:
+        row = conn.execute("SELECT value FROM meta WHERE key = 'marker'").fetchone()
+        return row[0] if row else None
+    finally:
+        conn.close()
+
+
+def _set_marker(db):
+    conn = sqlite3.connect(db)
+    conn.execute("INSERT INTO meta(key, value) VALUES ('marker', 'kept')")
+    conn.commit()
+    conn.close()
+
+
+@pytest.mark.req("REQ-NFR-07", "REQ-NFR-01")
+@pytest.mark.ac("AC-15")
+def test_launcher_on_busy_port_changes_nothing(tmp_path):
+    """A busy 127.0.0.1:5058 must stop the launcher before any reset or seed. Uses a temporary
+    instance dir only; if 5058 is already taken (e.g. a real demo), the precondition holds anyway."""
+    import socket
+    db = tmp_path / "inst" / "merchant_onboarding_lab.db"
+    assert _launch(tmp_path, "--check-only").returncode == 0
+    _set_marker(db)
+    listener = socket.socket()
+    try:
+        listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        listener.bind(("127.0.0.1", 5058))
+        listener.listen()
+    except OSError:
+        listener.close()
+        listener = None   # something already listens on 5058: the port is busy either way
+    try:
+        for args in (("--reset",), ("--reset", "--check-only"), ()):
+            r = _launch(tmp_path, *args)
+            assert r.returncode == 1, (args, r.stdout)
+            assert "already in use" in r.stdout and "Nothing was changed" in r.stdout
+            assert _marker(db) == "kept", args
+            assert not (tmp_path / "inst" / "backups").exists(), args
+        fresh = tmp_path / "fresh"
+        r = subprocess.run(["bash", str(REPO / "launch_demo.command")], capture_output=True, text=True, timeout=60,
+                           env={**os.environ, "MOBLAB_INSTANCE_DIR": str(fresh), "MOBLAB_PYTHON": sys.executable})
+        assert r.returncode == 1 and not fresh.exists()
+    finally:
+        if listener:
+            listener.close()
+
+
+@pytest.mark.req("REQ-NFR-07")
+@pytest.mark.ac("AC-15")
+def test_cli_reset_refuses_while_a_server_holds_the_database(tmp_path):
+    import socket
+    import time
+    import urllib.request
+    db = tmp_path / "inst" / "lab.db"
+    init_database(db)
+    _set_marker(db)
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        port = s.getsockname()[1]          # a custom port: the lock, not the port, protects the DB
+    server = subprocess.Popen([sys.executable, "-m", "moblab", "run", "--db", str(db), "--port", str(port)],
+                              cwd=REPO, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        deadline = time.time() + 20
+        while True:
+            try:
+                urllib.request.urlopen(f"http://127.0.0.1:{port}/", timeout=1)
+                break
+            except Exception:
+                assert time.time() < deadline and server.poll() is None
+                time.sleep(0.2)
+        r = subprocess.run([sys.executable, "-m", "moblab", "reset", "--db", str(db), "--yes"], cwd=REPO,
+                           capture_output=True, text=True, timeout=60)
+        assert r.returncode == 3 and "Stop it" in r.stdout and "Nothing was changed" in r.stdout
+        assert _marker(db) == "kept" and not (db.parent / "backups").exists()
+    finally:
+        server.terminate()
+        server.wait(timeout=10)
+    r = subprocess.run([sys.executable, "-m", "moblab", "reset", "--db", str(db), "--yes"], cwd=REPO,
+                       capture_output=True, text=True, timeout=60)
+    assert r.returncode == 0 and _marker(db) is None
+    backups = list((db.parent / "backups").glob("*.db"))
+    assert len(backups) == 1 and _marker(backups[0]) == "kept"

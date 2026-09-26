@@ -33,11 +33,21 @@ def cmd_seed(args) -> int:
 
 
 def cmd_reset(args) -> int:
-    from .seed import init_database
+    from .runlock import DatabaseInUse, exclusive
     db = _db(args)
     if not args.yes:
         print("Refusing to reset without --yes. The current database would be backed up first.")
         return 2
+    try:
+        with exclusive(db):   # precondition: no server has this database open (DEF-004)
+            return _reset_locked(db)
+    except DatabaseInUse as exc:
+        print(f"ERROR: {exc} Nothing was changed.")
+        return 3
+
+
+def _reset_locked(db: Path) -> int:
+    from .seed import init_database
     backup = None
     if db.exists():
         backups = db.parent / "backups"
@@ -96,12 +106,21 @@ def cmd_check(args) -> int:
 
 
 def cmd_run(args) -> int:
+    from .runlock import DatabaseInUse, hold_shared
     from .web import HOST, create_app
     db = _db(args)
-    app = create_app(db, instance_dir=db.parent)
-    print(f"Merchant Onboarding Policy Change Lab — http://{HOST}:{args.port}/  (database {db})")
-    print("Local development server for a synthetic lab; bound to 127.0.0.1 only. Press Ctrl+C to stop.")
-    app.run(host=HOST, port=args.port, debug=False, use_reloader=False, threaded=True)
+    try:
+        lock = hold_shared(db)   # held for the server's lifetime; blocks `reset` on this database
+    except DatabaseInUse as exc:
+        print(f"ERROR: {exc}")
+        return 3
+    try:
+        app = create_app(db, instance_dir=db.parent)
+        print(f"Merchant Onboarding Policy Change Lab — http://{HOST}:{args.port}/  (database {db})")
+        print("Local development server for a synthetic lab; bound to 127.0.0.1 only. Press Ctrl+C to stop.")
+        app.run(host=HOST, port=args.port, debug=False, use_reloader=False, threaded=True)
+    finally:
+        lock.close()
     return 0
 
 

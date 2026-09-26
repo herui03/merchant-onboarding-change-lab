@@ -19,7 +19,7 @@
     <dt>Created</dt><dd>{{ app.created_on }} by {{ actors[app.created_by].display_name }}</dd>
     <dt>Current revision</dt><dd data-testid="current-revision">{% if cur %}{{ cur.revision_no }} <span class="muted small">(id {{ cur.id }})</span>{% else %}none yet (draft){% endif %}{% if app.cycle > 1 %} · cycle {{ app.cycle }}{% endif %}</dd>
   </dl>
-  <p class="small"><a href="{{ url_for('ui.case_json', reference=app.reference) }}">Export JSON</a></p>
+  <p class="small row"><a class="jump button small" href="#actions" data-testid="jump-to-actions">Jump to actions ↓</a><a href="{{ url_for('ui.case_json', reference=app.reference) }}">Export JSON</a></p>
 </section>
 
 {{ error_callout(error) }}
@@ -204,7 +204,7 @@
 </div>
 
 <aside>
-  <section class="card" data-testid="actions-card">
+  <section class="card" id="actions" data-testid="actions-card">
     <h2>Actions</h2>
     {% if not v.actor %}
       <p>Choose a synthetic actor in the bar above to see the actions available to that role.</p>

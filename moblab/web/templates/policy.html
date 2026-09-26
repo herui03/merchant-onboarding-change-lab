@@ -71,17 +71,17 @@
   <p class="small">Lab date {{ lab.business_date }}. {% if impact.preview.effective %}{{ new.version }} is effective, so the preview below is what applying it would do right now.{% else %}{{ new.version }} is not effective until {{ new.effective_from }}, so applying it is refused before then. The preview shows what it <em>would</em> do.{% endif %} The preview is read-only.</p>
   <div class="table-wrap">
   <table data-testid="impact-table">
-    <thead><tr><th>Case</th><th>Product / band</th><th>Status now</th><th>Evaluated / decided under</th><th>Classification (preview)</th><th>Result</th><th>{{ new.version }} gaps</th></tr></thead>
+    <thead><tr><th>Case</th><th>Product / band</th><th>Status now</th><th>Policy now</th><th>Classification (preview)</th><th>Effect</th><th>{{ new.version }} gaps</th></tr></thead>
     <tbody>
     {% for i in impact.preview["items"] %}
       <tr class="{{ 'highlight' if i.classification in ('MIGRATED_EVIDENCE_REQUIRED', 'GRANDFATHERED_APPROVED') else '' }}" data-ref="{{ i.reference }}">
         <td class="nowrap"><a href="{{ url_for('ui.case', reference=i.reference) }}">{{ i.reference }}</a><div class="small muted">{{ i.legal_name }}</div></td>
-        <td class="mono small">{{ i.product_category }} / {{ i.volume_band }}</td>
+        <td class="mono small">{{ i.product_category|wbr }}<br>{{ i.volume_band }}</td>
         <td>{{ status_badge(i.status_before) }}</td>
         <td class="mono">{{ i.prior_policy_version or '—' }}</td>
-        <td class="small"><span class="mono" data-testid="classification">{{ i.classification }}</span><div class="muted">{{ labels.classification.get(i.classification, '') }}</div></td>
-        <td class="small">{% if i.status_after != i.status_before %}→ {{ status_badge(i.status_after) }}{% else %}no status change{% endif %}</td>
-        <td class="small">{% if i.classification == 'DRAFT_NOT_EVALUATED' %}—{% elif i.target_unmet %}{% for u in i.target_unmet %}<span class="mono">{{ u.doc_type }}</span>{% if not loop.last %}, {% endif %}{% endfor %}{% if i.classification == 'GRANDFATHERED_APPROVED' %} <strong>(not applied)</strong>{% endif %}{% else %}none{% endif %}</td>
+        <td class="small"><span class="mono" data-testid="classification">{{ i.classification|wbr }}</span><div class="muted">{{ labels.classification.get(i.classification, '') }}</div></td>
+        <td class="small">{% if i.status_after != i.status_before %}→ {{ status_badge(i.status_after) }}{% else %}unchanged{% endif %}</td>
+        <td class="small">{% if i.classification == 'DRAFT_NOT_EVALUATED' %}—{% elif i.target_unmet %}{% for u in i.target_unmet %}<span class="mono">{{ u.doc_type|wbr }}</span>{% if not loop.last %}, {% endif %}{% endfor %}{% if i.classification == 'GRANDFATHERED_APPROVED' %} <strong>(not applied)</strong>{% endif %}{% else %}none{% endif %}</td>
       </tr>
     {% endfor %}
     </tbody>
@@ -110,12 +110,14 @@
   <p><span class="badge {{ 'ok' if matched == examples|length else 'bad' }}" data-testid="examples-match">{{ matched }}/{{ examples|length }} match</span></p>
   <div class="table-wrap">
   <table data-testid="examples-table">
-    <thead><tr><th>ID</th><th>Policy</th><th>Product / band</th><th>Submitted</th><th>Expected unmet</th><th>Engine unmet</th><th>Outcome</th><th>Note</th></tr></thead>
+    <thead><tr><th>ID</th><th>Policy</th><th>Product / band</th><th>Submitted</th><th>Expected unmet</th><th>Engine unmet</th><th>Engine outcome</th><th>Matches</th><th>Note</th></tr></thead>
     <tbody>
     {% for x in examples %}
-      <tr><td class="mono">{{ x.example_id }}</td><td class="mono">{{ x.policy_version }}</td><td class="mono small">{{ x.product_category }} / {{ x.volume_band }}</td><td class="nowrap">{{ x.reference_date }}</td>
-        <td class="mono small">{{ x.expected_unmet or '—' }}</td><td class="mono small">{{ x.actual_unmet or '—' }}</td>
-        <td>{% if x.match %}<span class="badge ok">✓ {{ x.actual_outcome }}</span>{% else %}<span class="badge bad">✗ {{ x.actual_outcome }}</span>{% endif %}</td><td class="small">{{ x.note }}</td></tr>
+      <tr><td class="mono nowrap">{{ x.example_id }}</td><td class="mono">{{ x.policy_version }}</td><td class="mono small">{{ x.product_category|wbr }}<br>{{ x.volume_band }}</td><td class="nowrap">{{ x.reference_date }}</td>
+        <td class="mono small">{% for u in (x.expected_unmet or '—').split(';') %}<div>{{ u|wbr }}</div>{% endfor %}</td>
+        <td class="mono small">{% for u in (x.actual_unmet or '—').split(';') %}<div>{{ u|wbr }}</div>{% endfor %}</td>
+        <td class="small mono">{{ x.actual_outcome }}</td>
+        <td>{% if x.match %}<span class="badge ok" title="engine output equals the hand-authored expectation">✓ yes</span>{% else %}<span class="badge bad">✗ no — expected {{ x.expected_outcome }}</span>{% endif %}</td><td class="small">{{ x.note }}</td></tr>
     {% endfor %}
     </tbody>
   </table>

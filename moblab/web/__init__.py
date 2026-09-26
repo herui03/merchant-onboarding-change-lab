@@ -6,6 +6,7 @@ import secrets
 from pathlib import Path
 
 from flask import Flask, g, jsonify, render_template, request, session
+from markupsafe import Markup, escape
 from werkzeug.exceptions import HTTPException
 
 from .. import __version__
@@ -55,6 +56,11 @@ def create_app(db_path: str | Path, *, secret_key: str | None = None, instance_d
     )
     app.json.sort_keys = False
     security.install(app)
+
+    @app.template_filter("wbr")
+    def _wbr(value) -> Markup:
+        """Escape, then allow line breaks after '_' and ';' in long codes (never mid-word)."""
+        return Markup(str(escape("" if value is None else value)).replace("_", "_<wbr>").replace(";", ";<wbr>"))
 
     @app.template_filter("fromjson_counts")
     def _fromjson_counts(raw: str) -> str:
