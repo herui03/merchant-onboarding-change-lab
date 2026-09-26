@@ -1,0 +1,11 @@
+example_id,business_date,expected_effective_version,note
+PA-01,2025-12-31,NONE,Before v1 exists no policy is effective; submission is refused
+PA-02,2026-01-01,v1,v1 effective from its first day (inclusive)
+PA-03,2026-06-30,v1,Last day of v1
+PA-04,2026-07-01,v2,v2 effective from its first day (inclusive)
+PA-05,2026-12-31,v2,Later dates keep v2 until a newer version exists
+PA-06,2026-02-30,INVALID_DATE,Impossible calendar date is rejected
+PA-07,2026-7-1,INVALID_DATE,Dates must be zero-padded ISO YYYY-MM-DD
+PA-08,2026-07-01T00:00,INVALID_DATE,Timestamps are not dates
+PA-09,,INVALID_DATE,Empty value is rejected
+PA-10,tomorrow,INVALID_DATE,Relative words are rejected

@@ -1,0 +1,40 @@
+# Fictional policy — invented for a synthetic case study. Not a legal or regulatory rule.
+version = "v2"
+title = "Corporate Merchant Evidence Policy v2 (fictional)"
+effective_from = "2026-07-01"
+change_request = "CR-001"
+summary = "Adds EV-05: designated deferred-delivery products in elevated volume bands must include a service-scope statement issued within 90 days before the revision's submission date."
+
+[[rules]]
+id = "EV-01"
+name = "Business registration extract"
+doc_type = "REG_EXTRACT"
+rationale = "Confirms the synthetic business identifier belongs to the applying entity."
+
+[[rules]]
+id = "EV-02"
+name = "Beneficial ownership declaration"
+doc_type = "OWNERSHIP_DECL"
+rationale = "Records who owns and controls the applying entity (synthetic declaration)."
+
+[[rules]]
+id = "EV-03"
+name = "Settlement bank account confirmation"
+doc_type = "BANK_CONFIRM"
+rationale = "Confirms where settlement funds would be paid."
+
+[[rules]]
+id = "EV-04"
+name = "Prior processing history"
+doc_type = "PROCESSING_HISTORY"
+volume_bands = ["V4"]
+rationale = "Top-band merchants show six months of prior card processing statements."
+
+[[rules]]
+id = "EV-05"
+name = "Service-scope statement"
+doc_type = "SERVICE_SCOPE"
+product_categories = ["SUBSCRIPTION", "FUTURE_DELIVERY"]
+volume_bands = ["V3", "V4"]
+max_age_days = 90
+rationale = "Deferred-delivery products carry refund exposure; the reviewer needs a recent description of what is sold and when it is delivered. Age is measured as of the revision's submission date, not the decision date (see DEC-04)."
