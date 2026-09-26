@@ -137,6 +137,25 @@ def seeded_lab(tmp_path) -> Lab:
 
 
 # ----------------------------------------------------------------------------- evidence recorder
+# Only the files the evidence run itself writes. Everything else — modified tracked files AND untracked
+# source/tests/config — marks the tested tree as dirty.
+GENERATED_OUTPUTS = ("evidence/test_results.json", "evidence/e2e_story.json", "docs/06_test_evidence.md",
+                     "replay/case_study_replay.html")
+GENERATED_DIRS = ("docs/screenshots/",)
+
+
+def _is_generated(path: str) -> bool:
+    return path in GENERATED_OUTPUTS or (path.startswith(GENERATED_DIRS) and path.endswith((".png", ".jpg")))
+
+
+def source_tree_dirty(root) -> bool:
+    """True if any tracked change or untracked (non-ignored) file exists besides the evidence outputs."""
+    out = subprocess.run(["git", "status", "--porcelain", "--untracked-files=all"], cwd=root,
+                         capture_output=True, text=True).stdout
+    paths = [line[3:].strip().strip('"') for line in out.splitlines() if line.strip()]
+    return any(not _is_generated(p) for p in paths)
+
+
 _RESULTS: list[dict] = []
 
 
@@ -191,7 +210,7 @@ def pytest_sessionfinish(session, exitstatus):
     Path(out).write_text(json.dumps({
         "generated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "git_head": git("rev-parse", "HEAD"),
-        "git_worktree_dirty": bool(git("status", "--porcelain")),
+        "git_worktree_dirty": source_tree_dirty(root),
         "python": sys.version.split()[0],
         "platform": platform.platform(),
         "pytest_exit_status": int(exitstatus),

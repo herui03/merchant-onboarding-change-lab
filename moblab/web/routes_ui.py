@@ -105,6 +105,7 @@ def _render_case(reference, *, error: DomainError | None = None, status: int = 2
         abort(404)
     return render_template(
         "case.html", d=detail, v=_viewer(detail), error=error, form=form or {},
+        canonical_url=url_for("ui.case", reference=detail["app"]["reference"]),
         keys={name: new_key() for name in ("draft", "doc", "submit", "info", "approve", "reject", "reopen", "remove")},
         info_codes=INFO_REASON_CODES, approve_codes=APPROVE_REASON_CODES, reject_codes=REJECT_REASON_CODES,
     ), status
@@ -183,7 +184,7 @@ def set_clock():
     try:
         result = WorkflowService(g.db).set_business_date(_actor_id(), _form_payload(drop=("next",)))
     except DomainError as exc:
-        return render_template("lab.html", key=new_key(), error=exc), exc.http_status
+        return render_template("lab.html", key=new_key(), error=exc, canonical_url=url_for("ui.lab")), exc.http_status
     if result.body.get("changed"):
         flash(f"Lab business date is now {result.body['business_date']} "
               f"(effective policy {result.body.get('effective_policy')}).", "success")
@@ -200,7 +201,7 @@ def create_case():
         result = svc.create_application(_actor_id(), _form_payload())
     except DomainError as exc:
         return render_template("new_case.html", key=request.form.get("request_key") or new_key(),
-                               form=request.form, error=exc), exc.http_status
+                               form=request.form, error=exc, canonical_url=url_for("ui.new_case")), exc.http_status
     flash(f"Created {result.body['reference']} as a draft.", "success")
     return redirect(url_for("ui.case", reference=result.body["reference"]), 303)
 
@@ -272,7 +273,8 @@ def run_migration():
         evidence = load_evidence()
         return render_template("policy.html", cmp=policy_comparison(g.db), examples=example_results(g.db),
                                impact=impact(g.db), req_evidence=evidence_by_requirement(evidence), evidence=evidence,
-                               key=new_key(), error=exc, v=_viewer(None)), exc.http_status
+                               key=new_key(), error=exc, v=_viewer(None),
+                               canonical_url=url_for("ui.policy")), exc.http_status
     c = result.body["counts"]
     flash(f"Applied {result.body['target_version']} (run {result.body['run_id']}): "
           + ", ".join(f"{k} × {n}" for k, n in sorted(c.items())), "success")

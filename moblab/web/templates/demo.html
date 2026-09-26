@@ -11,7 +11,8 @@
   <h1>Guided demo — before and after policy v2</h1>
   <p>This is a live walkthrough on your local database. Each step says <strong>who</strong> to act as, <strong>where</strong> to go,
     what to do and what you should see. The ticks are read from the database. This page itself never writes anything.</p>
-  <p class="small muted">About 3 minutes. To start again: stop the server, then run <span class="mono">./launch_demo.command --reset</span>. It backs up the current database first.</p>
+  <p class="small muted">About 3 minutes in <strong>one browser window</strong>. Switch actor with the bar above. The actor is stored in this browser's session cookie, so every tab and window of this browser profile shares it.
+    To start again: stop the server (Ctrl+C in its terminal), then run <span class="mono">./launch_demo.command --reset</span>. It backs up the current database first.</p>
 </section>
 <ol class="steps" data-testid="demo-steps">
   <li class="{{ 'done' if after_date else 'current' }}">
@@ -28,7 +29,7 @@
   </li>
   <li class="{{ 'done' if after_date else '' }}">
     <h3>Move the lab clock to 2026-07-01</h3>
-    <p>Use <a href="{{ url_for('ui.lab') }}">Lab controls</a>. Any actor except the auditor can do this. Policy v2 becomes effective. Nothing about MOB-0003 changes silently.</p>
+    <p>Still acting as Sam, use <a href="{{ url_for('ui.lab') }}">Lab controls</a> or the button below. The clock is a simulation control that any actor except the auditor may move. Policy v2 becomes effective. Nothing about MOB-0003 changes silently.</p>
     {% if not after_date %}
     <form method="post" action="{{ url_for('ui.set_clock') }}" class="row">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -39,7 +40,7 @@
     {% endif %}
   </li>
   <li class="{{ 'done' if migrated else ('current' if after_date else '') }}">
-    <h3>As Sam: try to approve MOB-0003 — expect a refusal</h3>
+    <h3>As Sam: open MOB-0003 again and try to approve — expect a refusal</h3>
     <p>Approval now fails with <span class="mono">POLICY_MIGRATION_REQUIRED</span>. The revision was evaluated under v1, but v2 is effective, so no decision can be made until the policy owner applies v2.</p>
   </li>
   <li class="{{ 'done' if migrated else '' }}">
@@ -54,7 +55,7 @@
       The statement's age is measured as of the new submission date.</p>
   </li>
   <li class="{{ 'done' if m3_done else ('current' if m3_rev2 else '') }}">
-    <h3>As Sam: approve revision 2 under v2</h3>
+    <h3>Switch back to Sam: approve revision 2 under v2</h3>
     <p>The decision binds <em>revision 2 · v2 · its evaluation id</em> and stores a frozen snapshot. Revision 1 stays in the history, unchanged.</p>
   </li>
   <li class="{{ 'done' if m3_done and m2 and m2.status == 'approved' else '' }}">
@@ -66,7 +67,9 @@
   <h2>Optional: controls worth trying</h2>
   <ul>
     <li><strong>Self-review:</strong> act as <em>Kai Nakamura</em> (specialist and reviewer) and try to approve <a href="{{ url_for('ui.case', reference='MOB-0008') }}">MOB-0008</a>, which Kai created and submitted. Expect <span class="mono">SELF_REVIEW_FORBIDDEN</span>.</li>
-    <li><strong>Stale page:</strong> open a case's decision panel in two tabs. Change the case in one tab, then submit the other. Expect <span class="mono">STALE_REVISION</span> or <span class="mono">ALREADY_DECIDED</span>.</li>
+    <li><strong>Stale page (needs two cookie jars):</strong> tabs of one browser share the actor, so use a normal window <em>A</em> and a private/incognito window <em>B</em>.
+      In A, act as Sam and open MOB-0003, then leave A untouched: no refresh and no actor switch. In B, act as Morgan, set the date to 2026-07-01 and apply v2, then act as Alex, add the SERVICE_SCOPE statement and resubmit.
+      Back in A, click Approve. Expect <span class="mono">STALE_REVISION</span>, and nothing is written. The exact steps are in <span class="mono">docs/08_demo_script.md</span>.</li>
     <li><strong>Double click:</strong> each form carries a request key, so a duplicate post replays the original result and writes nothing.</li>
     <li><strong>Terminal state:</strong> rejected <a href="{{ url_for('ui.case', reference='MOB-0007') }}">MOB-0007</a> can only come back through a reasoned reopen, which starts a new revision cycle.</li>
   </ul>

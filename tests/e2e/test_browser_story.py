@@ -381,7 +381,8 @@ def test_before_after_story_in_chromium(browser, server, tmp_path):
     story_out = os.environ.get("MOBLAB_E2E_STORY_OUT")
     if story_out:
         head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
-        dirty = bool(subprocess.run(["git", "status", "--porcelain"], cwd=REPO, capture_output=True, text=True).stdout.strip())
+        from conftest import source_tree_dirty
+        dirty = source_tree_dirty(REPO)
         Path(story_out).parent.mkdir(parents=True, exist_ok=True)
         Path(story_out).write_text(json.dumps({
             "generated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -414,3 +415,125 @@ def test_every_page_fits_narrow_and_desktop_without_console_errors(browser, serv
     # The deliberate /cases/MOB-9999 visit is a real 404 (one resource error per visit); nothing else.
     assert errors == [RESOURCE_ERROR.format("404 (NOT FOUND)")] * 8, errors
     assert _db_one(db, "SELECT COUNT(*) FROM event")[0] == before
+
+
+# ----------------------------------------------------------------------------- docs/08_demo_script.md, literally
+def _switch(page, actor):
+    page.select_option("[data-testid=actor-select]", actor)
+    page.click("[data-testid=actor-switch]")
+    page.wait_for_selector("[data-testid=flash]")
+
+
+@pytest.mark.req("REQ-POL-05", "REQ-WF-04", "REQ-DEC-01", "REQ-POL-04")
+@pytest.mark.ac("AC-21")
+def test_demo_script_main_path_in_one_window(browser, server):
+    """Follows the single-window main path of docs/08_demo_script.md step by step."""
+    base, db = server["base"], server["db"]
+    errors: list[str] = []
+    ctx = browser.new_context(viewport=DESKTOP, base_url=base)
+    page = ctx.new_page()
+    _watch(page, errors)
+    page.goto("/")
+    assert page.locator(".synthetic-banner").is_visible()
+    _switch(page, "sam")
+    page.goto("/cases/MOB-0003")
+    assert page.get_by_role("button", name="Approve revision 1 under v1").is_visible()
+    page.goto("/lab")                                          # still Sam: the clock is a simulation control
+    page.fill("[data-testid=clock-input]", "2026-07-01")
+    page.get_by_role("button", name="Set lab date").click()
+    page.wait_for_selector("[data-testid=flash]")
+    page.goto("/cases/MOB-0003")
+    page.get_by_role("button", name="Approve revision 1 under v1").click()
+    page.wait_for_selector("[data-testid=error-banner]")
+    assert _error_code(page) == "POLICY_MIGRATION_REQUIRED"
+    _switch(page, "morgan")
+    page.goto("/policy")
+    page.check("[data-testid=migration-confirm]")
+    page.get_by_role("button", name="Apply v2 to in-flight applications").click()
+    page.wait_for_selector("[data-testid=flash]")
+    _switch(page, "alex")
+    page.goto("/cases/MOB-0003")
+    page.select_option("#doc-type", "SERVICE_SCOPE")
+    page.fill("#doc-title", "Service-scope statement")
+    page.fill("#doc-issued", "2026-06-28")
+    page.fill("#doc-pages", "3")
+    page.fill("#doc-ref", "SYN-DOC-LSC001")
+    page.get_by_role("button", name="Add document").click()
+    page.wait_for_selector("[data-testid=flash]")
+    page.fill("#response_note", "Added the service-scope statement required by policy v2.")
+    page.get_by_role("button", name="Resubmit as revision 2").click()
+    page.wait_for_selector("[data-testid=flash]")
+    _switch(page, "sam")
+    page.goto("/cases/MOB-0003")
+    page.get_by_role("button", name="Approve revision 2 under v2").click()
+    page.wait_for_selector("[data-testid=flash]")
+    assert "approved (revision 2, policy v2)" in page.locator("[data-testid=flash]").inner_text()
+    page.goto("/cases/MOB-0002")
+    assert page.locator("[data-testid=grandfathered-banner]").is_visible()
+    page.goto("/uat")
+    assert page.locator("[data-testid=uat-disclaimer]").is_visible()
+    assert errors == [RESOURCE_ERROR.format("409 (CONFLICT)")], errors   # only the intended refusal
+    assert _db_one(db, "SELECT status FROM application WHERE reference = 'MOB-0003'")[0] == "approved"
+    ctx.close()
+
+
+@pytest.mark.req("REQ-ROLE-01", "REQ-DEC-01")
+@pytest.mark.ac("AC-22")
+def test_tabs_of_one_browser_share_the_actor(browser, server):
+    """Why the stale-tab exercise needs two cookie jars: in ONE context, switching actor in another tab
+    changes who submits the old tab's form (here Alex → FORBIDDEN_ROLE, not STALE_REVISION)."""
+    base = server["base"]
+    ctx = browser.new_context(viewport=DESKTOP, base_url=base)
+    tab1, tab2 = ctx.new_page(), ctx.new_page()
+    tab1.goto("/")
+    _switch(tab1, "sam")
+    tab1.goto("/cases/MOB-0003")
+    tab2.goto("/")
+    _switch(tab2, "alex")
+    tab1.get_by_role("button", name="Approve revision 1 under v1").click()
+    tab1.wait_for_selector("[data-testid=error-banner]")
+    assert _error_code(tab1) == "FORBIDDEN_ROLE"
+    ctx.close()
+
+
+@pytest.mark.req("REQ-DEC-01")
+@pytest.mark.ac("AC-22")
+def test_demo_script_optional_stale_tab_exercise(browser, server):
+    """The optional exercise in docs/08: window A (normal) and window B (private) = two contexts."""
+    base, db = server["base"], server["db"]
+    a = browser.new_context(viewport=DESKTOP, base_url=base).new_page()
+    b = browser.new_context(viewport=DESKTOP, base_url=base).new_page()
+    a.goto("/")
+    _switch(a, "sam")
+    a.goto("/cases/MOB-0003")                     # step 1, then A is left untouched
+    b.goto("/")
+    _switch(b, "morgan")                          # step 2
+    b.goto("/lab")
+    b.fill("[data-testid=clock-input]", "2026-07-01")
+    b.click("[data-testid=clock-submit]")
+    b.goto("/policy")
+    b.check("[data-testid=migration-confirm]")
+    b.click("[data-testid=migration-submit]")
+    b.wait_for_selector("[data-testid=flash]")
+    _switch(b, "alex")                            # step 3
+    b.goto("/cases/MOB-0003")
+    b.select_option("#doc-type", "SERVICE_SCOPE")
+    b.fill("#doc-title", "Service-scope statement")
+    b.fill("#doc-issued", "2026-06-28")
+    b.fill("#doc-pages", "3")
+    b.fill("#doc-ref", "SYN-DOC-LSC001")
+    b.click("[data-testid=add-document]")
+    b.wait_for_selector("[data-testid=flash]")
+    b.fill("#response_note", "Added the service-scope statement required by policy v2.")
+    b.click("[data-testid=submit-button]")
+    b.wait_for_selector("[data-testid=flash]")
+    a.get_by_role("button", name="Approve revision 1 under v1").click()   # step 4
+    a.wait_for_selector("[data-testid=error-banner]")
+    assert _error_code(a) == "STALE_REVISION"
+    assert _db_one(db, "SELECT COUNT(*) FROM decision WHERE application_id = 3")[0] == 0
+    a.goto("/cases/MOB-0003")                     # step 5: refresh, then approve succeeds
+    a.get_by_role("button", name="Approve revision 2 under v2").click()
+    a.wait_for_selector("[data-testid=flash]")
+    assert _db_one(db, "SELECT status FROM application WHERE reference = 'MOB-0003'")[0] == "approved"
+    a.context.close()
+    b.context.close()

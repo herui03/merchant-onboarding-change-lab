@@ -29,8 +29,12 @@
 </section>
 <section class="card">
   <h2>Reset and restart</h2>
-  <p>The database persists across restarts in <span class="mono">instance/merchant_onboarding_lab.db</span>. To start the demo again, stop the server and run:</p>
-  <pre>./launch_demo.command --reset</pre>
-  <p class="small">Reset first copies the current database into <span class="mono">instance/backups/</span>, then creates a fresh synthetic seed. There is no reset button in the web UI.</p>
+  <p>The database persists across restarts in <span class="mono">instance/merchant_onboarding_lab.db</span>. To start the demo again:</p>
+  <ol>
+    <li>Stop this server with Ctrl+C in the terminal window that runs it.</li>
+    <li>Run <span class="mono">./launch_demo.command --reset</span>.</li>
+  </ol>
+  <p class="small">Reset first copies the current database into <span class="mono">instance/backups/</span>, then creates a fresh synthetic seed. It refuses, and changes nothing, while port 5058 is busy or while any lab server holds the database. There is no reset button in the web UI.</p>
+  <p class="small">The acting actor is stored in this browser's session cookie and shared by all its tabs. Use a private/incognito window for a second, independent actor.</p>
 </section>
 {% endblock %}

@@ -551,3 +551,25 @@ def test_cli_reset_refuses_while_a_server_holds_the_database(tmp_path):
     assert r.returncode == 0 and _marker(db) is None
     backups = list((db.parent / "backups").glob("*.db"))
     assert len(backups) == 1 and _marker(backups[0]) == "kept"
+
+
+# ----------------------------------------------------------------------------- DEF-006 regression
+@pytest.mark.req("REQ-NFR-06")
+@pytest.mark.ac("AC-21", "AC-22")
+def test_actor_switch_after_a_refused_post_returns_to_a_get_page(app):
+    """Found by following docs/08 literally in one browser window."""
+    sam = Api(app).act("sam")
+    fields = _form_fields(sam.get("/cases/MOB-0003").get_data(as_text=True), "reject-form")
+    fields.update(reason_code="OTHER", reason_text="short")               # refused: reason too short
+    r = sam.c.post("/cases/MOB-0003/decision", data=fields)
+    assert r.status_code == 422
+    nxt = re.search(r'name="next" value="([^"]*)"', r.get_data(as_text=True)).group(1)
+    assert nxt == "/cases/MOB-0003"
+    r = sam.c.post("/lab/actor", data={"csrf_token": sam.token, "actor_id": "morgan", "next": nxt})
+    assert r.status_code == 302 and r.headers["Location"].endswith("/cases/MOB-0003")
+    assert sam.c.get(r.headers["Location"]).status_code == 200
+    for bad_post in ("/policy/migrations", "/lab/clock", "/cases"):
+        body = sam.c.post(bad_post, data={"csrf_token": sam.token}).get_data(as_text=True)
+        nxt = re.search(r'name="next" value="([^"]*)"', body)
+        if nxt:
+            assert sam.c.get(nxt.group(1)).status_code == 200, (bad_post, nxt.group(1))

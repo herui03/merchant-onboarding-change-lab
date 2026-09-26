@@ -25,7 +25,8 @@
   </div>
   <form method="post" action="{{ url_for('ui.set_actor') }}" class="actor-switch">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <input type="hidden" name="next" value="{{ request.path }}{% if request.query_string %}?{{ request.query_string.decode('ascii', 'replace') }}{% endif %}">
+    {# A page rendered by a refused POST must not send the switch back to that POST-only URL (DEF-006). #}
+    <input type="hidden" name="next" value="{% if canonical_url %}{{ canonical_url }}{% elif request.method == 'GET' %}{{ request.path }}{% if request.query_string %}?{{ request.query_string.decode('ascii', 'replace') }}{% endif %}{% else %}/{% endif %}">
     <label for="actor-select" class="nowrap">Acting as</label>
     <select id="actor-select" name="actor_id" data-testid="actor-select">
       {% if not current_actor %}<option value="">— choose a synthetic actor —</option>{% endif %}
