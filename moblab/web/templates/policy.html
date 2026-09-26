@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge, error_callout, hidden_common with context %}
+{% block title %}Policy change CR-001{% endblock %}
+{% block content %}
+{% set old = cmp.old %}{% set new = cmp.new %}
+<section class="card">
+  <h1>Policy change {{ new.change_request }}: {{ old.version }} → {{ new.version }}</h1>
+  <p>{{ new.summary }}</p>
+  <p class="small muted">Everything on this page is computed from the implemented rule data (<span class="mono">policies/*.toml</span>, stored as immutable rows) and the live engine. None of it is hard-coded text. Fictional policy, not a legal threshold.</p>
+  <div class="grid grid-2">
+    {% for p in [old, new] %}
+    <div class="callout {{ 'info' if lab.effective_policy == p.version else '' }}" data-testid="policy-card-{{ p.version }}">
+      <strong class="mono">{{ p.version }}</strong> — {{ p.title }}<br>
+      Effective from <strong>{{ p.effective_from }}</strong>{% if lab.effective_policy == p.version %} · <span class="badge info">effective now</span>{% endif %}<br>
+      <span class="small">{{ p.rules|length }} rules · rules sha256 <span class="sha">{{ cmp.rows_sha[p.version] }}</span></span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <h2>Rule comparison</h2>
+  <div class="table-wrap">
+  <table data-testid="rule-diff">
+    <thead><tr><th>Rule</th><th>Evidence</th><th>Applies when</th><th>Age limit</th><th>{{ old.version }}</th><th>{{ new.version }}</th><th>Change</th></tr></thead>
+    <tbody>
+    {% for r in cmp.diff %}{% set rule = r.new or r.old %}
+      <tr class="{{ 'highlight' if r.change != 'Unchanged' else '' }}">
+        <td class="mono">{{ r.rule_id }}</td>
+        <td>{{ rule.name }}<div class="mono small muted">{{ rule.doc_type }}</div></td>
+        <td class="small">{% if rule.product_categories %}product ∈ {{ rule.product_categories|join(', ') }}{% else %}any product{% endif %}{% if rule.volume_bands %}<br>band ∈ {{ rule.volume_bands|join(', ') }}{% else %}<br>any band{% endif %}</td>
+        <td class="small">{% if rule.max_age_days is not none %}0–{{ rule.max_age_days }} days before the revision's submission date (inclusive){% else %}none{% endif %}</td>
+        <td>{{ '✓' if r.old else '—' }}</td><td>{{ '✓' if r.new else '—' }}</td>
+        <td><span class="badge {{ 'ok' if r.change == 'Added' else ('warn' if r.change != 'Unchanged' else '') }}">{{ r.change }}</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <div class="callout info small">
+    <strong>Boundary behaviour, as implemented:</strong> the policy version is chosen by the server lab date at submission (<span class="mono">effective_from ≤ date</span>, so 2026-06-30 → {{ old.version }} and 2026-07-01 → {{ new.version }}).
+    Evidence age = submission date − issue date. It is accepted when 0 ≤ age ≤ limit, so exactly 90 days passes and 91 fails. A document issued after the submission date never counts.
+    Age is measured <strong>as of the revision's original submission date</strong>, including during migration re-evaluation. It does not guarantee freshness on the decision date (DEC-04). A more recent statement needs a new revision.
+  </div>
+</section>
+
+<section class="card">
+  <h2>Required evidence by product × declared volume band</h2>
+  <p class="small muted">Each cell is the engine's list of required document types under {{ old.version }} → {{ new.version }}. Green marks what {{ new.version }} adds.</p>
+  <div class="table-wrap">
+  <table data-testid="requirement-matrix">
+    <thead><tr><th>Product</th>{% for c in cmp.matrix[0].cells %}<th>{{ c.band }}</th>{% endfor %}</tr></thead>
+    <tbody>
+    {% for row in cmp.matrix %}
+      <tr><td class="mono small">{{ row.product }}</td>
+      {% for c in row.cells %}
+        <td class="{{ 'added' if c.added else '' }}" data-cell="{{ row.product }}-{{ c.band }}">
+          <ul class="pill-list">{% for t in c.new %}<li class="{{ 'added' if t in c.added else '' }}">{{ t | replace('_DECL', '') | replace('_CONFIRM', '') | replace('_EXTRACT', '') }}</li>{% endfor %}</ul>
+          {% if c.added %}<div class="small">+ {{ c.added|join(', ') }} in {{ new.version }}</div>{% endif %}
+        </td>
+      {% endfor %}</tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="card" id="impact" data-testid="impact">
+  <h2>Change impact on the current portfolio</h2>
+  {{ error_callout(error) }}
+  <p class="small">Lab date {{ lab.business_date }}. {% if impact.preview.effective %}{{ new.version }} is effective, so the preview below is what applying it would do right now.{% else %}{{ new.version }} is not effective until {{ new.effective_from }}, so applying it is refused before then. The preview shows what it <em>would</em> do.{% endif %} The preview is read-only.</p>
+  <div class="table-wrap">
+  <table data-testid="impact-table">
+    <thead><tr><th>Case</th><th>Product / band</th><th>Status now</th><th>Evaluated / decided under</th><th>Classification (preview)</th><th>Result</th><th>{{ new.version }} gaps</th></tr></thead>
+    <tbody>
+    {% for i in impact.preview["items"] %}
+      <tr class="{{ 'highlight' if i.classification in ('MIGRATED_EVIDENCE_REQUIRED', 'GRANDFATHERED_APPROVED') else '' }}" data-ref="{{ i.reference }}">
+        <td class="nowrap"><a href="{{ url_for('ui.case', reference=i.reference) }}">{{ i.reference }}</a><div class="small muted">{{ i.legal_name }}</div></td>
+        <td class="mono small">{{ i.product_category }} / {{ i.volume_band }}</td>
+        <td>{{ status_badge(i.status_before) }}</td>
+        <td class="mono">{{ i.prior_policy_version or '—' }}</td>
+        <td class="small"><span class="mono" data-testid="classification">{{ i.classification }}</span><div class="muted">{{ labels.classification.get(i.classification, '') }}</div></td>
+        <td class="small">{% if i.status_after != i.status_before %}→ {{ status_badge(i.status_after) }}{% else %}no status change{% endif %}</td>
+        <td class="small">{% if i.classification == 'DRAFT_NOT_EVALUATED' %}—{% elif i.target_unmet %}{% for u in i.target_unmet %}<span class="mono">{{ u.doc_type }}</span>{% if not loop.last %}, {% endif %}{% endfor %}{% if i.classification == 'GRANDFATHERED_APPROVED' %} <strong>(not applied)</strong>{% endif %}{% else %}none{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if impact.runs %}
+  <h3>Recorded migration runs</h3>
+  <ul data-testid="migration-runs">{% for run in impact.runs %}<li>Run {{ run.id }} on {{ run.run_on }} by {{ actors[run.run_by].display_name }} — {{ (run.summary_json | fromjson_counts) }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if v.is_policy_owner %}
+  <form method="post" action="{{ url_for('ui.run_migration') }}" data-testid="migration-form">
+    {{ hidden_common(key) }}
+    <input type="hidden" name="target_version" value="{{ new.version }}">
+    <label class="check"><input type="checkbox" name="confirm" value="yes" data-testid="migration-confirm"> I have reviewed the preview. Apply {{ new.version }} to in-flight applications: re-evaluate them, move new gaps to needs information, and grandfather approvals.</label>
+    <button type="submit" data-testid="migration-submit">Apply {{ new.version }} to in-flight applications</button>
+  </form>
+  {% else %}
+  <p class="small muted">Only the <strong>Policy owner</strong> (Morgan Blake) can apply the policy. Switch actor to try it.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Hand-authored examples vs the live engine</h2>
+  <p class="small muted">Written in <span class="mono">acceptance/policy_examples.csv</span> and committed before the engine existed. Each row is re-evaluated live here.</p>
+  {% set matched = examples | selectattr('match') | list | length %}
+  <p><span class="badge {{ 'ok' if matched == examples|length else 'bad' }}" data-testid="examples-match">{{ matched }}/{{ examples|length }} match</span></p>
+  <div class="table-wrap">
+  <table data-testid="examples-table">
+    <thead><tr><th>ID</th><th>Policy</th><th>Product / band</th><th>Submitted</th><th>Expected unmet</th><th>Engine unmet</th><th>Outcome</th><th>Note</th></tr></thead>
+    <tbody>
+    {% for x in examples %}
+      <tr><td class="mono">{{ x.example_id }}</td><td class="mono">{{ x.policy_version }}</td><td class="mono small">{{ x.product_category }} / {{ x.volume_band }}</td><td class="nowrap">{{ x.reference_date }}</td>
+        <td class="mono small">{{ x.expected_unmet or '—' }}</td><td class="mono small">{{ x.actual_unmet or '—' }}</td>
+        <td>{% if x.match %}<span class="badge ok">✓ {{ x.actual_outcome }}</span>{% else %}<span class="badge bad">✗ {{ x.actual_outcome }}</span>{% endif %}</td><td class="small">{{ x.note }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Requirement and test evidence for this change</h2>
+  {% if evidence %}
+  <p class="small muted">From the recorded developer test run {{ evidence.generated_at_utc }} (git {{ evidence.git_head[:12] }}{% if evidence.git_worktree_dirty %}, uncommitted changes present{% endif %}). These are developer checks, not external UAT.</p>
+  {% else %}
+  <p class="small muted">No recorded test run is available (<span class="mono">evidence/test_results.json</span> is missing).</p>
+  {% endif %}
+  <div class="table-wrap">
+  <table data-testid="req-evidence">
+    <thead><tr><th>Requirement</th><th>Tests</th><th>Passed</th><th>Failed</th><th>Skipped</th></tr></thead>
+    <tbody>
+    {% for req in ['REQ-POL-01','REQ-POL-02','REQ-POL-03','REQ-POL-04','REQ-POL-05','REQ-POL-06','REQ-POL-07','REQ-POL-08','REQ-POL-09','REQ-DEC-01','REQ-DEC-05'] %}
+      {% set e = req_evidence.get(req) %}
+      <tr><td class="mono">{{ req }}</td><td>{{ e.tests|length if e else 0 }}</td><td>{{ e.passed if e else 0 }}</td><td>{{ e.failed if e else 0 }}</td><td>{{ e.skipped if e else 0 }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="small">Full mapping: <span class="mono">docs/06_test_evidence.md</span> and the <a href="{{ url_for('ui.uat') }}">UAT evidence</a> page.</p>
+</section>
+{% endblock %}

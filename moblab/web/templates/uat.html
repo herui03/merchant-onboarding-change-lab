@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}UAT evidence{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Acceptance evidence</h1>
+  <div class="callout warn" data-testid="uat-disclaimer">
+    <strong>These are developer acceptance checks, not external UAT.</strong> The scenarios below were written before
+    implementation and executed by automated service tests and a scripted Chromium run. <strong>No external business
+    tester has executed UAT and no signoff exists.</strong>
+  </div>
+  {% if evidence %}
+  {% set c = evidence.counts %}
+  <div class="grid grid-4">
+    <div><div class="stat" data-testid="passed-count">{{ c.get('passed', 0) }}</div><div class="stat-label">passed</div></div>
+    <div><div class="stat">{{ c.get('failed', 0) }}</div><div class="stat-label">failed</div></div>
+    <div><div class="stat">{{ c.get('skipped', 0) }}</div><div class="stat-label">skipped</div></div>
+    <div><div class="stat">{{ evidence.results|length }}</div><div class="stat-label">recorded test results</div></div>
+  </div>
+  <p class="small muted">Recorded run {{ evidence.generated_at_utc }} · git {{ evidence.git_head[:12] }}{% if evidence.git_worktree_dirty %} (working tree had uncommitted changes){% endif %} · Python {{ evidence.python }} · selection: {{ evidence.selection or 'full suite' }}. Parametrised tests count once per case.</p>
+  {% else %}
+  <p class="muted">No recorded run found in <span class="mono">evidence/test_results.json</span>.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Scenarios (expected outcomes written before implementation)</h2>
+  <div class="table-wrap">
+  <table data-testid="scenario-table">
+    <thead><tr><th>ID</th><th>Scenario</th><th>Requirements</th><th>Automated checks</th><th>External UAT</th></tr></thead>
+    <tbody>
+    {% for s in scenarios.scenario %}
+      {% set e = by_ac.get(s.id) %}
+      <tr>
+        <td class="mono nowrap">{{ s.id }}</td>
+        <td><details><summary>{{ s.title }}</summary>
+          <div class="small"><strong>Given</strong> {{ s.given }}<br><strong>When</strong> {{ s.when }}<br><strong>Then</strong><ul>{% for t in s.then %}<li>{{ t }}</li>{% endfor %}</ul></div>
+        </details></td>
+        <td class="small mono">{{ s.requirements|join(' ') }}</td>
+        <td>{% if e %}{% if e.failed %}<span class="badge bad">{{ e.failed }} failed</span>{% endif %}<span class="badge ok">{{ e.passed }} passed</span>{% if e.skipped %} <span class="badge warn">{{ e.skipped }} skipped</span>{% endif %}{% else %}<span class="badge warn">no automated check</span>{% endif %}</td>
+        <td><span class="badge">not performed</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+{% if e2e %}
+<section class="card" data-testid="e2e-summary">
+  <h2>Recorded browser run (Chromium)</h2>
+  <p class="small muted">{{ e2e.generated_at_utc }} · git {{ e2e.git_head[:12] }} · {{ e2e.browser }} · viewports {{ e2e.viewports|join(', ') }}. This is a recorded developer run, not a live workflow.</p>
+  <ol>
+  {% for step in e2e.steps %}<li><strong>{{ step.actor }}</strong>: {{ step.action }} — <span class="small">observed: {{ step.observed }}</span></li>{% endfor %}
+  </ol>
+</section>
+{% endif %}
+
+<section class="card">
+  <h2>External UAT signoff</h2>
+  <div class="table-wrap"><table data-testid="signoff-table">
+    <thead><tr><th>Role (would sign)</th><th>Name</th><th>Date</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Business owner — onboarding operations</td><td>—</td><td>—</td><td><span class="badge warn">Not performed</span></td></tr>
+      <tr><td>Policy owner — evidence policy CR-001</td><td>—</td><td>—</td><td><span class="badge warn">Not performed</span></td></tr>
+      <tr><td>Risk review lead</td><td>—</td><td>—</td><td><span class="badge warn">Not performed</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">Release recommendation: <span class="mono">docs/07_release_recommendation.md</span>. It is conditional on external UAT, which has not happened.</p>
+</section>
+{% endblock %}

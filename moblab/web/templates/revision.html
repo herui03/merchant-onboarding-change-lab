@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge, evaluation_table with context %}
+{% set app = r.detail.app %}
+{% set rev = r.revision %}
+{% block title %}{{ app.reference }} revision {{ rev.revision_no }}{% endblock %}
+{% block content %}
+<section class="card">
+  <p class="small"><a href="{{ url_for('ui.case', reference=app.reference) }}">← {{ app.reference }}</a></p>
+  <h1>{{ app.reference }} · revision {{ rev.revision_no }} <span class="muted small">(id {{ rev.id }}, immutable)</span></h1>
+  <dl class="kv">
+    <dt>Submitted</dt><dd>{{ rev.submitted_on }} by {{ actors[rev.submitted_by].display_name }} (cycle {{ rev.cycle }})</dd>
+    <dt>Legal name</dt><dd>{{ rev.legal_name }}</dd>
+    <dt>Identifier</dt><dd class="mono">{{ rev.business_identifier }}</dd>
+    <dt>Product / band</dt><dd class="mono">{{ rev.product_category }} / {{ rev.volume_band }}</dd>
+    <dt>Activity</dt><dd>{{ rev.activity_summary or '—' }}</dd>
+    {% if rev.response_note %}<dt>Response note</dt><dd>{{ rev.response_note }}</dd>{% endif %}
+    <dt>Content sha256</dt><dd class="sha">{{ rev.content_sha256 }}</dd>
+    <dt>Outcome</dt><dd>{% if rev.decision %}{{ status_badge(rev.decision.outcome) }} under {{ rev.decision.policy_version }}{% elif rev.is_current %}{{ status_badge(app.status) }}{% else %}superseded by a later revision{% endif %}</dd>
+  </dl>
+</section>
+{% if r.diff %}
+<section class="card" data-testid="revision-diff">
+  <h2>Changes since revision {{ r.previous.revision_no }}</h2>
+  {% if not r.diff.fields and not r.diff.added and not r.diff.removed %}<p class="muted">No content changes.</p>{% endif %}
+  <ul>
+    {% for f in r.diff.fields %}<li><span class="mono">{{ f.field }}</span>: “{{ f.from }}” → “{{ f.to }}”</li>{% endfor %}
+    {% for doc in r.diff.added %}<li><span class="added">Added</span> <span class="mono">{{ doc.doc_type }}</span> {{ doc.title }} (issued {{ doc.issued_on }}, {{ doc.reference }})</li>{% endfor %}
+    {% for doc in r.diff.removed %}<li>Removed <span class="mono">{{ doc.doc_type }}</span> {{ doc.title }} ({{ doc.reference }})</li>{% endfor %}
+  </ul>
+</section>
+{% endif %}
+<section class="card">
+  <h2>Documents</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Type</th><th>Title</th><th>Issued</th><th>Pages</th><th>Reference</th></tr></thead>
+    <tbody>{% for doc in rev.documents %}<tr><td>{{ doc.position }}</td><td class="mono small">{{ doc.doc_type }}</td><td>{{ doc.title }}</td><td class="nowrap">{{ doc.issued_on }}</td><td>{{ doc.page_count }}</td><td class="mono small">{{ doc.reference }}</td></tr>{% else %}<tr><td colspan="6" class="muted">None.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% for e in rev.evaluations %}
+<section class="card">
+  <h2>Evaluation #{{ e.id }} · <span class="mono">{{ e.policy_version }}</span> · {{ e.trigger }} {% if e.complete %}<span class="badge ok">complete</span>{% else %}<span class="badge bad">gaps</span>{% endif %}</h2>
+  <p class="small muted">Evaluated on {{ e.evaluated_on }}{% if e.migration_run_id %} by migration run {{ e.migration_run_id }}{% endif %}. Reference date for evidence age: submitted {{ e.reference_date }}. Result sha256 <span class="sha">{{ e.result_sha256 }}</span></p>
+  {{ evaluation_table(e, rev.submitted_on) }}
+</section>
+{% endfor %}
+{% endblock %}

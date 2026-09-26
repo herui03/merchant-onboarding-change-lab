@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge, error_callout, field_error, hidden_common, evaluation_table with context %}
+{% set app = d.app %}
+{% set cur = d.current %}
+{% set ev = d.current_eval %}
+{% block title %}{{ app.reference }}{% endblock %}
+{% block content %}
+<section class="card" data-testid="case-header">
+  <div class="spread">
+    <h1>{{ app.reference }} · {{ app.draft_legal_name }}</h1>
+    <div class="row">{{ status_badge(app.status) }}
+      {% if d.grandfathered %}<span class="badge grand" data-testid="grandfathered-badge">grandfathered</span>{% endif %}
+      {% if d.migration_required %}<span class="badge warn">migration required</span>{% endif %}
+    </div>
+  </div>
+  <dl class="kv">
+    <dt>Business identifier</dt><dd class="mono">{{ app.business_identifier }} <span class="muted small">(synthetic)</span></dd>
+    <dt>Product / band</dt><dd class="mono">{{ app.draft_product_category }} / {{ app.draft_volume_band }}</dd>
+    <dt>Created</dt><dd>{{ app.created_on }} by {{ actors[app.created_by].display_name }}</dd>
+    <dt>Current revision</dt><dd data-testid="current-revision">{% if cur %}{{ cur.revision_no }} <span class="muted small">(id {{ cur.id }})</span>{% else %}none yet (draft){% endif %}{% if app.cycle > 1 %} · cycle {{ app.cycle }}{% endif %}</dd>
+  </dl>
+  <p class="small"><a href="{{ url_for('ui.case_json', reference=app.reference) }}">Export JSON</a></p>
+</section>
+
+{{ error_callout(error) }}
+
+{% if d.migration_required %}
+<div class="callout warn" data-testid="migration-required-banner">
+  <strong>Policy {{ lab.effective_policy }} has been effective since {{ lab.effective_from }}.</strong>
+  Revision {{ cur.revision_no }} was evaluated under {{ ev.policy_version }}. Decisions on it are refused
+  (<span class="mono">POLICY_MIGRATION_REQUIRED</span>) until the policy owner applies {{ lab.effective_policy }} on the
+  <a href="{{ url_for('ui.policy') }}#impact">Policy change</a> page.
+</div>
+{% endif %}
+{% if d.grandfathered %}
+{% set dec = cur.decision %}
+<div class="callout grand" data-testid="grandfathered-banner">
+  <strong>Grandfathered.</strong> Approved under {{ dec.policy_version }} on {{ dec.decided_on }}. Policy {{ lab.effective_policy }} is
+  not applied to approved cases (DEC-02). The decision's frozen snapshot stays authoritative: <span class="sha">{{ dec.snapshot_sha256 }}</span>
+</div>
+{% endif %}
+{% for ir in d.open_info_requests %}
+<div class="callout warn" data-testid="info-request">
+  <strong>Information requested</strong> ({{ 'system, policy migration' if ir.source == 'policy_migration' else 'reviewer' }}) on {{ ir.requested_on }} by {{ actors[ir.requested_by].display_name }} —
+  <span class="mono">{{ ir.reason_code }}</span>: {{ labels.reasons.get(ir.reason_code, ir.reason_code) }}
+  <div>{{ ir.message }}</div>
+  {% if ir.requested_doc_types %}<div class="small">Requested: {% for t in ir.requested_doc_types %}<span class="mono">{{ t }}</span>{% if not loop.last %}, {% endif %}{% endfor %}</div>{% endif %}
+</div>
+{% endfor %}
+
+<div class="layout-case">
+<div>
+  {% if cur %}
+  <section class="card" data-testid="current-revision-card">
+    <div class="spread">
+      <h2>Revision {{ cur.revision_no }} (submitted, immutable)</h2>
+      <a href="{{ url_for('ui.revision', reference=app.reference, revision_no=cur.revision_no) }}">Revision view →</a>
+    </div>
+    <dl class="kv">
+      <dt>Submitted</dt><dd>{{ cur.submitted_on }} by {{ actors[cur.submitted_by].display_name }}</dd>
+      <dt>Legal name</dt><dd>{{ cur.legal_name }}</dd>
+      <dt>Product / band</dt><dd class="mono">{{ cur.product_category }} / {{ cur.volume_band }}</dd>
+      <dt>Activity</dt><dd data-testid="activity-summary">{{ cur.activity_summary or '—' }}</dd>
+      {% if cur.response_note %}<dt>Response note</dt><dd>{{ cur.response_note }}</dd>{% endif %}
+      <dt>Content sha256</dt><dd class="sha">{{ cur.content_sha256 }}</dd>
+    </dl>
+    <h3>Evidence (metadata only)</h3>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Type</th><th>Title</th><th>Issued</th><th>Pages</th><th>Reference</th></tr></thead>
+      <tbody>
+      {% for doc in cur.documents %}
+        <tr><td class="mono small">{{ doc.doc_type }}</td><td>{{ doc.title }}</td><td class="nowrap">{{ doc.issued_on }}</td><td>{{ doc.page_count }}</td><td class="mono small">{{ doc.reference }}</td></tr>
+      {% else %}<tr><td colspan="5" class="muted">No documents in this revision.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% if ev %}
+    <h3 data-testid="evaluation-heading">Policy evaluation #{{ ev.id }} under <span class="mono">{{ ev.policy_version }}</span> —
+      {% if ev.complete %}<span class="badge ok">complete</span>{% else %}<span class="badge bad">gaps</span>{% endif %}</h3>
+    <p class="small muted">Trigger: {{ ev.trigger }}{% if ev.trigger == 'migration' %} (run {{ ev.migration_run_id }}){% endif %} · evaluated on {{ ev.evaluated_on }} ·
+      evidence age measured <strong>as of submitted {{ cur.submitted_on }}</strong>, not the decision date (DEC-04).</p>
+    {{ evaluation_table(ev, cur.submitted_on) }}
+    {% if cur.evaluations|length > 1 %}
+    <details class="small"><summary>Earlier evaluations of this revision (kept for history)</summary>
+      <ul>{% for e in cur.evaluations[:-1] %}<li>#{{ e.id }} under <span class="mono">{{ e.policy_version }}</span> ({{ e.trigger }}, {{ e.evaluated_on }}) — {{ 'complete' if e.complete else 'gaps: ' ~ (e.result.unmet | map(attribute='doc_type') | join(', ')) }}</li>{% endfor %}</ul>
+    </details>
+    {% endif %}
+    {% endif %}
+  </section>
+  {% endif %}
+
+  {% for dec in d.decisions|reverse %}
+  <section class="card" data-testid="decision-record">
+    <h2>Decision: {{ status_badge(dec.outcome) }}</h2>
+    <dl class="kv">
+      <dt>Revision</dt><dd>{{ dec.snapshot.revision.content.revision_no }} (id {{ dec.revision_id }})</dd>
+      <dt>Policy / evaluation</dt><dd class="mono">{{ dec.policy_version }} / #{{ dec.evaluation_id }}</dd>
+      <dt>Reason</dt><dd><span class="mono">{{ dec.reason_code }}</span> — {{ dec.reason_text }}</dd>
+      <dt>Decided</dt><dd>{{ dec.decided_on }} by {{ actors[dec.decided_by].display_name }}</dd>
+      <dt>Snapshot sha256</dt><dd class="sha">{{ dec.snapshot_sha256 }}</dd>
+    </dl>
+    <details><summary>Frozen snapshot (revision content, policy rules, evaluation)</summary><pre>{{ dec.snapshot | tojson(indent=2) }}</pre></details>
+  </section>
+  {% endfor %}
+
+  {% if app.status in ('draft', 'needs_information') %}
+  <section class="card" data-testid="draft-card">
+    <h2>Working draft {% if cur %}(becomes revision {{ cur.revision_no + 1 }} on submission){% else %}(becomes revision 1 on submission){% endif %}</h2>
+    {% if d.draft_required_doc_types %}
+    <p class="small">If submitted today, it is evaluated under <strong>{{ d.draft_required_doc_types.policy_version }}</strong>, which requires:
+      {% for t in d.draft_required_doc_types.doc_types %}<span class="mono">{{ t }}</span>{% if not loop.last %}, {% endif %}{% endfor %}.
+      Age limits are measured as of the submission date.</p>
+    {% endif %}
+    {% set can_edit = v.is_specialist %}
+    {% if can_edit %}
+    <form method="post" action="{{ url_for('ui.update_draft', reference=app.reference) }}" data-testid="draft-form">
+      {{ hidden_common(keys.draft) }}
+      <div class="grid grid-2">
+        <div class="field"><label for="d-legal">Legal name</label><input id="d-legal" type="text" name="legal_name" value="{{ app.draft_legal_name }}">{{ field_error(error, 'legal_name') }}</div>
+        <div class="field"><label for="d-product">Product</label><select id="d-product" name="product_category">{% for k in labels.products %}<option value="{{ k }}"{% if app.draft_product_category == k %} selected{% endif %}>{{ k }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="d-band">Volume band</label><select id="d-band" name="volume_band">{% for k, lbl in labels.bands.items() %}<option value="{{ k }}"{% if app.draft_volume_band == k %} selected{% endif %}>{{ k }} — {{ lbl }}</option>{% endfor %}</select></div>
+      </div>
+      <div class="field"><label for="d-summary">Activity summary</label><textarea id="d-summary" name="activity_summary" maxlength="400">{{ app.draft_activity_summary }}</textarea>{{ field_error(error, 'activity_summary') }}</div>
+      <button type="submit" class="secondary">Save draft fields</button>
+    </form>
+    <hr>
+    {% endif %}
+    <h3>Draft evidence (metadata only)</h3>
+    <div class="table-wrap">
+    <table data-testid="draft-documents">
+      <thead><tr><th>Type</th><th>Title</th><th>Issued</th><th>Pages</th><th>Reference</th>{% if can_edit %}<th></th>{% endif %}</tr></thead>
+      <tbody>
+      {% for doc in d.draft_documents %}
+      <tr><td class="mono small">{{ doc.doc_type }}</td><td>{{ doc.title }}</td><td class="nowrap">{{ doc.issued_on }}</td><td>{{ doc.page_count }}</td><td class="mono small">{{ doc.reference }}</td>
+        {% if can_edit %}<td><form method="post" action="{{ url_for('ui.remove_document', reference=app.reference, document_id=doc.id) }}" class="inline">{{ hidden_common(keys.remove ~ doc.id) }}<button type="submit" class="small secondary">Remove</button></form></td>{% endif %}</tr>
+      {% else %}<tr><td colspan="6" class="muted">No draft documents yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% if can_edit %}
+    <form method="post" action="{{ url_for('ui.add_document', reference=app.reference) }}" data-testid="add-document-form">
+      {{ hidden_common(keys.doc) }}
+      <fieldset><legend>Add document metadata</legend>
+      <div class="grid grid-2">
+        <div class="field"><label for="doc-type">Type</label><select id="doc-type" name="doc_type">{% for k, lbl in labels.doc_types.items() %}<option value="{{ k }}"{% if form.get('doc_type') == k %} selected{% endif %}>{{ k }} — {{ lbl }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="doc-title">Title</label><input id="doc-title" type="text" name="title" maxlength="120" value="{{ form.get('title', '') }}">{{ field_error(error, 'title') }}</div>
+        <div class="field"><label for="doc-issued">Issued on</label><input id="doc-issued" type="text" name="issued_on" placeholder="YYYY-MM-DD" value="{{ form.get('issued_on', '') }}"><div class="hint">Not after the lab date {{ lab.business_date }}.</div>{{ field_error(error, 'issued_on') }}</div>
+        <div class="field"><label for="doc-pages">Pages</label><input id="doc-pages" type="text" inputmode="numeric" name="page_count" value="{{ form.get('page_count', '1') }}">{{ field_error(error, 'page_count') }}</div>
+        <div class="field"><label for="doc-ref">Synthetic reference</label><input id="doc-ref" type="text" name="reference" placeholder="SYN-DOC-ABC123" value="{{ form.get('reference', '') }}">{{ field_error(error, 'reference') }}</div>
+      </div>
+      <button type="submit" class="secondary" data-testid="add-document">Add document</button>
+      </fieldset>
+    </form>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  {% if d.revisions %}
+  <section class="card">
+    <h2>Revision history</h2>
+    <div class="table-wrap">
+    <table data-testid="revision-history">
+      <thead><tr><th>Rev</th><th>Submitted</th><th>By</th><th>Evaluations</th><th>Outcome</th></tr></thead>
+      <tbody>
+      {% for r in d.revisions %}
+      <tr><td><a href="{{ url_for('ui.revision', reference=app.reference, revision_no=r.revision_no) }}">{{ r.revision_no }}</a>{% if r.is_current %} <span class="badge info">current</span>{% endif %}</td>
+        <td class="nowrap">{{ r.submitted_on }}</td><td>{{ actors[r.submitted_by].display_name }}</td>
+        <td class="small">{% for e in r.evaluations %}<div><span class="mono">{{ e.policy_version }}</span> {{ e.trigger }} — {{ 'complete' if e.complete else 'gaps' }}</div>{% endfor %}</td>
+        <td>{% if r.decision %}{{ status_badge(r.decision.outcome) }}{% elif r.info_requests %}<span class="badge warn">info requested</span>{% else %}—{% endif %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if d.migration_items %}
+  <section class="card" data-testid="migration-record">
+    <h2>Policy migration record</h2>
+    <ul>
+    {% for m in d.migration_items %}
+      <li>Run {{ m.run_id }} ({{ m.run.target_version }}) on {{ m.run.run_on }} by {{ actors[m.run.run_by].display_name }}:
+        <span class="mono">{{ m.classification }}</span> — {{ labels.classification.get(m.classification, '') }}.
+        {% if m.classification == 'GRANDFATHERED_APPROVED' %}
+          {% if m.target_unmet %}Under {{ m.run.target_version }} this revision would lack {% for u in m.target_unmet %}<span class="mono">{{ u.doc_type }}</span>{% if not loop.last %}, {% endif %}{% endfor %} — <strong>not applied</strong>.{% else %}{{ m.run.target_version }} would add no requirement.{% endif %}
+        {% elif m.new_gaps %}New gaps: {% for u in m.new_gaps %}<span class="mono">{{ u.rule_id }} {{ u.doc_type }}</span>{% if not loop.last %}, {% endif %}{% endfor %}.{% endif %}
+        Status {{ m.status_before }} → {{ m.status_after }}.</li>
+    {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section class="card">
+    <h2>Timeline</h2>
+    <ul class="timeline" data-testid="case-timeline">
+    {% for e in d.events|reverse %}
+      <li><div><strong class="mono">{{ e.event_type }}</strong>{% if e.actor_id %} · {{ actors[e.actor_id].display_name }}{% endif %}{% if e.reason_code %} · <span class="mono">{{ e.reason_code }}</span>{% endif %}</div>
+        {% if e.message %}<div class="small">{{ e.message }}</div>{% endif %}
+        <div class="when">business date {{ e.business_date }} · recorded {{ e.recorded_at }}</div></li>
+    {% endfor %}
+    </ul>
+  </section>
+</div>
+
+<aside>
+  <section class="card" data-testid="actions-card">
+    <h2>Actions</h2>
+    {% if not v.actor %}
+      <p>Choose a synthetic actor in the bar above to see the actions available to that role.</p>
+    {% else %}
+      <p class="small muted">Acting as <strong>{{ v.actor.display_name }}</strong> ({{ v.actor.roles | map('replace', '_', ' ') | join(', ') }}). The page only offers hints; the server enforces every rule.</p>
+
+      {% if v.is_specialist and app.status in ('draft', 'needs_information') %}
+      <form method="post" action="{{ url_for('ui.submit', reference=app.reference) }}" data-testid="submit-form">
+        {{ hidden_common(keys.submit) }}
+        {% if cur %}
+        <div class="field"><label for="response_note">Response note (required for a resubmission)</label>
+          <textarea id="response_note" name="response_note" maxlength="1000" placeholder="What changed since revision {{ cur.revision_no }}?">{{ form.get('response_note', '') }}</textarea>{{ field_error(error, 'response_note') }}</div>
+        {% endif %}
+        <button type="submit" data-testid="submit-button">{{ 'Resubmit as revision ' ~ (cur.revision_no + 1) if cur else 'Submit revision 1' }}</button>
+      </form>
+      {% endif %}
+
+      {% if v.is_reviewer and app.status == 'submitted' and cur and ev %}
+        {% if v.involved %}
+        <div class="callout warn" data-testid="self-review-warning">You created or submitted this application, so self-review is blocked (DEC-12). The forms stay visible so the server-side refusal can be demonstrated.</div>
+        {% endif %}
+        <div class="callout info" data-testid="binding-box">
+          <strong>You are inspecting:</strong> revision {{ cur.revision_no }} (id {{ cur.id }}) · evaluation #{{ ev.id }} under <span class="mono">{{ ev.policy_version }}</span>.
+          Your decision is bound to exactly this. If the case changes before you submit, the server refuses it as stale.
+        </div>
+        <form method="post" action="{{ url_for('ui.decide', reference=app.reference) }}" data-testid="approve-form">
+          {{ hidden_common(keys.approve) }}
+          <input type="hidden" name="outcome" value="approve">
+          <input type="hidden" name="revision_id" value="{{ cur.id }}">
+          <input type="hidden" name="policy_version" value="{{ ev.policy_version }}">
+          <input type="hidden" name="evaluation_id" value="{{ ev.id }}">
+          <fieldset><legend>Approve</legend>
+            <div class="field"><label for="a-code">Reason code</label><select id="a-code" name="reason_code">{% for k, lbl in approve_codes.items() %}<option value="{{ k }}">{{ k }} — {{ lbl }}</option>{% endfor %}</select></div>
+            <div class="field"><label for="a-text">Reviewer note</label><textarea id="a-text" name="reason_text" maxlength="1000">Evidence reviewed against the policy and found consistent.</textarea><div class="hint">10–1000 characters.</div></div>
+            <button type="submit" class="ok" data-testid="approve-button">Approve revision {{ cur.revision_no }} under {{ ev.policy_version }}</button>
+          </fieldset>
+        </form>
+        <form method="post" action="{{ url_for('ui.decide', reference=app.reference) }}" data-testid="reject-form">
+          {{ hidden_common(keys.reject) }}
+          <input type="hidden" name="outcome" value="reject">
+          <input type="hidden" name="revision_id" value="{{ cur.id }}">
+          <input type="hidden" name="policy_version" value="{{ ev.policy_version }}">
+          <input type="hidden" name="evaluation_id" value="{{ ev.id }}">
+          <fieldset><legend>Reject</legend>
+            <div class="field"><label for="r-code">Reason code</label><select id="r-code" name="reason_code">{% for k, lbl in reject_codes.items() %}<option value="{{ k }}">{{ k }} — {{ lbl }}</option>{% endfor %}</select></div>
+            <div class="field"><label for="r-text">Reason (at least 20 characters)</label><textarea id="r-text" name="reason_text" maxlength="1000"></textarea></div>
+            <button type="submit" class="danger" data-testid="reject-button">Reject revision {{ cur.revision_no }}</button>
+          </fieldset>
+        </form>
+        <form method="post" action="{{ url_for('ui.request_information', reference=app.reference) }}" data-testid="info-form">
+          {{ hidden_common(keys.info) }}
+          <input type="hidden" name="revision_id" value="{{ cur.id }}">
+          <fieldset><legend>Request information</legend>
+            <div class="field"><label for="i-code">Reason code</label><select id="i-code" name="reason_code">{% for k, lbl in info_codes.items() %}<option value="{{ k }}">{{ k }} — {{ lbl }}</option>{% endfor %}</select></div>
+            <div class="field"><label for="i-msg">Message to the specialist (20–1000 characters)</label><textarea id="i-msg" name="message" maxlength="1000"></textarea></div>
+            <div class="field"><span class="small muted">Requested document types (optional)</span>
+              {% for k in labels.doc_types %}<label class="check"><input type="checkbox" name="requested_doc_types" value="{{ k }}"> <span class="mono small">{{ k }}</span></label>{% endfor %}</div>
+            <button type="submit" class="secondary" data-testid="info-button">Request information</button>
+          </fieldset>
+        </form>
+      {% endif %}
+
+      {% if v.is_reviewer and app.status == 'rejected' %}
+      <form method="post" action="{{ url_for('ui.reopen', reference=app.reference) }}" data-testid="reopen-form">
+        {{ hidden_common(keys.reopen) }}
+        <fieldset><legend>Reopen with reason</legend>
+          <p class="small">The rejection stays on record unchanged. Reopening starts a new draft cycle, and the next submission becomes a new revision.</p>
+          <div class="field"><label for="ro-text">Reason (at least 20 characters)</label><textarea id="ro-text" name="reason_text" maxlength="1000"></textarea></div>
+          <button type="submit" class="secondary">Reopen</button>
+        </fieldset>
+      </form>
+      {% endif %}
+
+      {% if v.is_policy_owner and d.migration_required %}
+      <p><a class="button" href="{{ url_for('ui.policy') }}#impact">Review impact and apply {{ lab.effective_policy }}</a></p>
+      {% endif %}
+
+      {% if app.status == 'approved' %}<p class="small">Approved decisions are final. There are no further actions (DEC-08).</p>{% endif %}
+      {% if app.status == 'submitted' and not v.is_reviewer %}<p class="small">In review. Only a risk reviewer who did not create or submit the case can decide it.</p>{% endif %}
+      {% if app.status in ('draft', 'needs_information') and not v.is_specialist %}<p class="small">Waiting on an onboarding specialist.</p>{% endif %}
+    {% endif %}
+  </section>
+</aside>
+</div>
+{% endblock %}
