@@ -1,5 +1,8 @@
 # Merchant Onboarding Policy Change Lab — Business Analyst & UAT Case Study
 
+> **Recruiters and non-technical readers:** start with the plain-English **[HR overview](docs/HR_OVERVIEW.md)**.
+> It covers the problem, a normal and a failure example, the 3-minute demo, screenshots, evidence, limits and who did what.
+
 An independent, **synthetic** workflow prototype for corporate merchant onboarding at a fictional payment
 provider. It shows one coherent business change end to end: an effective-dated evidence policy moves from
 **v1 to v2 on 2026-07-01**. Approved cases are grandfathered, in-flight cases follow an explicit migration
@@ -36,7 +39,8 @@ without losing the audit trail or deciding on stale information.
 
 ## Run it (offline, no credentials)
 
-The repository is **private**, so you need access. Before this branch is merged, clone the branch exactly:
+While this work is on its review branch, clone that branch exactly. After it is merged into `main`, drop the
+`--branch …` part:
 
 ```bash
 git clone --branch claude/dazzling-mendel-1zti2z https://github.com/herui03/merchant-onboarding-change-lab.git
@@ -80,6 +84,7 @@ State persists across restarts. The runtime database, secret key and backups liv
 
 | Document | Content |
 |---|---|
+| [HR overview](docs/HR_OVERVIEW.md) | Plain-English summary for recruiters: problem, normal and failure flow, demo, screenshots, evidence, limits |
 | [00 Scope and truthfulness](docs/00_scope_and_truthfulness.md) | What is and isn't claimed, attribution, business-date authority |
 | [01 Business context](docs/01_business_context.md) | Fictional As-Is / To-Be, pain points, actors, scope |
 | [02 Requirements](docs/02_requirements.md) | Stable REQ IDs with observable acceptance criteria |

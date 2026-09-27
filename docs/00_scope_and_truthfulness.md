@@ -1,7 +1,7 @@
 # 00 · Scope and truthfulness statement
 
 **Project:** Merchant Onboarding Policy Change Lab — Business Analyst & UAT Case Study
-**Status:** independent, synthetic learning prototype. Private repository. Not deployed.
+**Status:** independent, synthetic learning prototype. Developed in a private repository; its visibility is set by the owner. Not deployed.
 
 ## What this is
 
