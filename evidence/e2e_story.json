@@ -1,0 +1,441 @@
+{
+  "generated_at_utc": "2026-09-26T21:28:31Z",
+  "git_head": "6a6be96e4459929e7b77ea547f192c3cfc84bf2e",
+  "git_worktree_dirty": false,
+  "browser": "Chromium 141.0.7390.37 (Playwright, headless)",
+  "viewports": [
+    "1440x900",
+    "390x844"
+  ],
+  "server": "python -m moblab run on 127.0.0.1 (ephemeral port), fresh seeded database",
+  "console_errors": [
+    "console.error: Failed to load resource: the server responded with a status of 409 (CONFLICT)",
+    "console.error: Failed to load resource: the server responded with a status of 409 (CONFLICT)",
+    "console.error: Failed to load resource: the server responded with a status of 409 (CONFLICT)",
+    "console.error: Failed to load resource: the server responded with a status of 403 (FORBIDDEN)"
+  ],
+  "console_errors_expected": [
+    "console.error: Failed to load resource: the server responded with a status of 409 (CONFLICT)",
+    "console.error: Failed to load resource: the server responded with a status of 409 (CONFLICT)",
+    "console.error: Failed to load resource: the server responded with a status of 409 (CONFLICT)",
+    "console.error: Failed to load resource: the server responded with a status of 403 (FORBIDDEN)"
+  ],
+  "steps": [
+    {
+      "actor": "Visitor",
+      "action": "Open the overview",
+      "expected": "Scope banner and synthetic disclaimer visible; 8 seeded cases",
+      "observed": "count=8; banner present=True",
+      "screenshot": "01-overview-desktop.jpg"
+    },
+    {
+      "actor": "Visitor",
+      "action": "Open the case list",
+      "expected": "MOB-0001..MOB-0008 with status and policy columns",
+      "observed": "rows=8",
+      "screenshot": "03-case-list-desktop.jpg"
+    },
+    {
+      "actor": "Sam Okafor (Risk Reviewer)",
+      "action": "Inspect MOB-0003 (SUBSCRIPTION/V3) on 2026-06-24",
+      "expected": "Revision 1 evaluated under v1, complete; decision panel bound to revision 1 \u00b7 v1",
+      "observed": "Policy evaluation #5 under v1 \u2014 complete | You are inspecting: revision 1 (id 5) \u00b7 evaluation #5 under v1. Your decision is bound to ",
+      "screenshot": "04-mob0003-inspected-under-v1-desktop.jpg"
+    },
+    {
+      "actor": "Morgan Blake (Policy Owner)",
+      "action": "Move the lab date to 2026-07-01",
+      "expected": "Effective policy becomes v2",
+      "observed": "business date 2026-07-01, effective v2",
+      "screenshot": null
+    },
+    {
+      "actor": "Sam Okafor (Risk Reviewer)",
+      "action": "Try to approve MOB-0003 after 2026-07-01 without migration",
+      "expected": "Refused: POLICY_MIGRATION_REQUIRED; nothing written",
+      "observed": "error POLICY_MIGRATION_REQUIRED; decisions for MOB-0003 = 0",
+      "screenshot": "05-approval-blocked-migration-required-desktop.jpg"
+    },
+    {
+      "actor": "Morgan Blake (Policy Owner)",
+      "action": "Open Policy change: rule diff, product\u00d7band matrix, examples, impact preview",
+      "expected": "Preview: MOB-0003 MIGRATED_EVIDENCE_REQUIRED, MOB-0002 GRANDFATHERED_APPROVED; 24/24 examples match",
+      "observed": "MOB-0003 MIGRATED_EVIDENCE_REQUIRED, MOB-0002 GRANDFATHERED_APPROVED, examples 24/24 match",
+      "screenshot": "06-policy-comparison-and-preview-desktop.jpg"
+    },
+    {
+      "actor": "Morgan Blake (Policy Owner)",
+      "action": "Apply v2 to in-flight applications",
+      "expected": "One migration run recorded with per-case classifications",
+      "observed": "Applied v2 (run 1): DRAFT_NOT_EVALUATED \u00d7 1, GRANDFATHERED_APPROVED \u00d7 2, MIGRATED_EVIDENCE_REQUIRED \u00d7 1, MIGRATED_NO_NEW_EVIDENCE \u00d7 2, MIGRATED_PENDING_RESUBMISSION \u00d7 1, TERMINAL_REJECTED_UNCHANGED \u00d7 1",
+      "screenshot": "07-v2-applied-desktop.jpg"
+    },
+    {
+      "actor": "Alex Rivera (Onboarding Specialist)",
+      "action": "Open MOB-0003 after migration",
+      "expected": "Needs information; system request POLICY_CHANGE_EVIDENCE_REQUIRED for SERVICE_SCOPE",
+      "observed": "Information requested (system, policy migration) on 2026-07-01 by Morgan Blake \u2014 POLICY_CHANGE_EVIDENCE_REQUIRED: Policy change requires additional evidence Pol",
+      "screenshot": "08-needs-information-after-migration-desktop.jpg"
+    },
+    {
+      "actor": "Alex Rivera (Onboarding Specialist)",
+      "action": "Add SERVICE_SCOPE metadata (issued 2026-06-28) and resubmit with a note",
+      "expected": "Revision 2 evaluated under v2, complete; age shown as of the submission date",
+      "observed": "Submitted revision 2 \u2014 evaluated under policy v2. | Policy evaluation #12 under v2 \u2014 complete",
+      "screenshot": "09-resubmitted-revision-2-under-v2-desktop.jpg"
+    },
+    {
+      "actor": "Sam Okafor (Risk Reviewer)",
+      "action": "Submit the approval form from the tab opened before the change",
+      "expected": "Refused: STALE_REVISION; nothing written",
+      "observed": "error STALE_REVISION; decisions for MOB-0003 = 0",
+      "screenshot": "10-stale-approval-refused-desktop.jpg"
+    },
+    {
+      "actor": "Sam Okafor (Risk Reviewer)",
+      "action": "Approve MOB-0003 revision 2",
+      "expected": "Approved; decision bound to revision 2 \u00b7 v2 with frozen snapshot",
+      "observed": "Decision recorded: approved (revision 2, policy v2).; DB decision = ('approved', 'v2', 2)",
+      "screenshot": "11-approved-under-v2-desktop.jpg"
+    },
+    {
+      "actor": "Sam Okafor (Risk Reviewer)",
+      "action": "Open MOB-0002 (approved under v1, no service-scope statement)",
+      "expected": "Still approved; grandfathered banner; migration record shows the v2 gap as not applied",
+      "observed": "Grandfathered. Approved under v1 on 2026-06-18. Policy v2 is not applied to approved cases (DEC-02). The decision's frozen snapshot stays authoritative: 81dfe03",
+      "screenshot": "12-grandfathered-v1-approval-desktop.jpg"
+    },
+    {
+      "actor": "Dana Morales (Senior Risk Reviewer)",
+      "action": "Approve MOB-0004 from a form opened before Sam rejected it",
+      "expected": "Refused: ALREADY_DECIDED; the rejection stands",
+      "observed": "error ALREADY_DECIDED; MOB-0004 status rejected, 1 decision",
+      "screenshot": "13-already-decided-refused-desktop.jpg"
+    },
+    {
+      "actor": "Kai Nakamura (dual role)",
+      "action": "Try to approve MOB-0008, which Kai created and submitted",
+      "expected": "Refused: SELF_REVIEW_FORBIDDEN",
+      "observed": "error SELF_REVIEW_FORBIDDEN",
+      "screenshot": "14-self-review-blocked-desktop.jpg"
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "01-overview",
+      "desktop": {
+        "file": "01-overview-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "01-overview-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "table"
+        ]
+      }
+    },
+    {
+      "name": "02-guided-demo",
+      "desktop": {
+        "file": "02-guided-demo-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "02-guided-demo-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      }
+    },
+    {
+      "name": "03-case-list",
+      "desktop": {
+        "file": "03-case-list-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "03-case-list-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "case-table"
+        ]
+      }
+    },
+    {
+      "name": "04-mob0003-inspected-under-v1",
+      "desktop": {
+        "file": "04-mob0003-inspected-under-v1-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "04-mob0003-inspected-under-v1-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "table",
+          "evaluation-table",
+          "revision-history"
+        ]
+      }
+    },
+    {
+      "name": "05-approval-blocked-migration-required",
+      "desktop": {
+        "file": "05-approval-blocked-migration-required-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "05-approval-blocked-migration-required-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "table",
+          "evaluation-table",
+          "revision-history"
+        ]
+      }
+    },
+    {
+      "name": "06-policy-comparison-and-preview",
+      "desktop": {
+        "file": "06-policy-comparison-and-preview-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "06-policy-comparison-and-preview-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "rule-diff",
+          "requirement-matrix",
+          "impact-table",
+          "examples-table",
+          "req-evidence"
+        ]
+      }
+    },
+    {
+      "name": "07-v2-applied",
+      "desktop": {
+        "file": "07-v2-applied-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "07-v2-applied-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "rule-diff",
+          "requirement-matrix",
+          "impact-table",
+          "examples-table",
+          "req-evidence"
+        ]
+      }
+    },
+    {
+      "name": "08-needs-information-after-migration",
+      "desktop": {
+        "file": "08-needs-information-after-migration-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "08-needs-information-after-migration-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "table",
+          "evaluation-table",
+          "draft-documents",
+          "revision-history"
+        ]
+      }
+    },
+    {
+      "name": "09-resubmitted-revision-2-under-v2",
+      "desktop": {
+        "file": "09-resubmitted-revision-2-under-v2-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "09-resubmitted-revision-2-under-v2-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "table",
+          "evaluation-table",
+          "revision-history"
+        ]
+      }
+    },
+    {
+      "name": "10-stale-approval-refused",
+      "desktop": {
+        "file": "10-stale-approval-refused-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "10-stale-approval-refused-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "table",
+          "evaluation-table",
+          "revision-history"
+        ]
+      }
+    },
+    {
+      "name": "11-approved-under-v2",
+      "desktop": {
+        "file": "11-approved-under-v2-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "11-approved-under-v2-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "table",
+          "evaluation-table",
+          "revision-history"
+        ]
+      }
+    },
+    {
+      "name": "12-grandfathered-v1-approval",
+      "desktop": {
+        "file": "12-grandfathered-v1-approval-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "12-grandfathered-v1-approval-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "table",
+          "evaluation-table",
+          "revision-history"
+        ]
+      }
+    },
+    {
+      "name": "13-already-decided-refused",
+      "desktop": {
+        "file": "13-already-decided-refused-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "13-already-decided-refused-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "table",
+          "evaluation-table",
+          "revision-history"
+        ]
+      }
+    },
+    {
+      "name": "14-self-review-blocked",
+      "desktop": {
+        "file": "14-self-review-blocked-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "14-self-review-blocked-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "table",
+          "evaluation-table",
+          "revision-history"
+        ]
+      }
+    },
+    {
+      "name": "15-revision-2-diff",
+      "desktop": {
+        "file": "15-revision-2-diff-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "15-revision-2-diff-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "table",
+          "evaluation-table"
+        ]
+      }
+    },
+    {
+      "name": "16-uat-evidence",
+      "desktop": {
+        "file": "16-uat-evidence-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "16-uat-evidence-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "scenario-table",
+          "signoff-table"
+        ]
+      }
+    },
+    {
+      "name": "17-audit-timeline",
+      "desktop": {
+        "file": "17-audit-timeline-desktop.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": []
+      },
+      "narrow": {
+        "file": "17-audit-timeline-narrow.jpg",
+        "overflow_px": 0,
+        "squashed_headers": [],
+        "scrolling_tables": [
+          "audit-table"
+        ]
+      }
+    }
+  ]
+}

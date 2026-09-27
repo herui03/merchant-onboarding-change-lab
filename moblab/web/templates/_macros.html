@@ -1,0 +1,60 @@
+{% macro status_badge(status) -%}
+<span class="badge {{ status }}" data-testid="status-badge">{{ labels.status.get(status, status) }}</span>
+{%- endmacro %}
+
+{% macro error_callout(error) -%}
+{% if error %}
+<div class="callout bad" role="alert" data-testid="error-banner">
+  <strong>Refused — <span class="mono" data-testid="error-code">{{ error.code }}</span></strong>
+  <div>{{ error.message }}</div>
+  {% if error.details and error.details.fields %}
+  <ul class="small">{% for f, m in error.details.fields.items() %}<li><span class="mono">{{ f }}</span>: {{ m }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if error.details and error.details.unmet %}
+  <div class="small">Unmet: {% for u in error.details.unmet %}<span class="mono">{{ u.rule_id }} {{ u.doc_type }} {{ u.status }}</span>{% if not loop.last %}, {% endif %}{% endfor %}</div>
+  {% endif %}
+  {% if error.details and error.details.differs_in %}
+  <div class="small">The request key was already bound to a request that differs in: {{ error.details.differs_in | join(', ') }}.</div>
+  {% endif %}
+  <div class="small muted">Nothing was written. The server re-checks every rule; what the page shows is only a hint.</div>
+</div>
+{% endif %}
+{%- endmacro %}
+
+{% macro field_error(error, name) -%}
+{% if error and error.details and error.details.fields and error.details.fields.get(name) %}<div class="err">{{ error.details.fields[name] }}</div>{% endif %}
+{%- endmacro %}
+
+{% macro hidden_common(key) -%}
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<input type="hidden" name="request_key" value="{{ key }}">
+{%- endmacro %}
+
+{% macro evaluation_table(ev, submitted_on) -%}
+<div class="table-wrap">
+<table data-testid="evaluation-table">
+  <thead><tr><th>Rule</th><th>Evidence</th><th>Result</th><th>Why</th></tr></thead>
+  <tbody>
+  {% for r in ev.result.rules %}
+    <tr>
+      <td class="mono nowrap">{{ r.rule_id }}</td>
+      <td>{{ labels.doc_types.get(r.doc_type, r.doc_type) }}<div class="mono small muted">{{ r.doc_type }}</div></td>
+      <td>
+        {% if r.status == 'SATISFIED' %}<span class="badge ok">Satisfied</span>
+        {% elif r.status == 'NOT_APPLICABLE' %}<span class="badge">Not applicable</span>
+        {% elif r.status == 'MISSING' %}<span class="badge bad">Missing</span>
+        {% else %}<span class="badge warn">Outside age window</span>{% endif %}
+      </td>
+      <td class="small">
+        {% if r.status == 'NOT_APPLICABLE' %}Rule does not apply to {{ ev.result.product_category }} / {{ ev.result.volume_band }}.
+        {% elif not r.details %}No {{ r.doc_type }} document in this revision.
+        {% else %}
+          {% for dd in r.details %}<div><span class="mono">{{ dd.reference }}</span> issued {{ dd.issued_on }} — {% if dd.age_days >= 0 %}age {{ dd.age_days }} day(s) as of submitted {{ submitted_on }}{% else %}issued {{ -dd.age_days }} day(s) after submitted {{ submitted_on }}{% endif %}{% if dd.why and 'limit' in dd.why %} ({{ 'within' if dd.counts else 'outside' }} limit){% endif %}</div>{% endfor %}
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{%- endmacro %}

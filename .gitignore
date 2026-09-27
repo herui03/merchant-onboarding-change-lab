@@ -1,0 +1,21 @@
+# Python / tooling
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# Runtime state — never committed
+instance/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite3
+
+# Local build output
+dist/
+test-output/
+.playwright-artifacts/
+
+# OS noise
+.DS_Store

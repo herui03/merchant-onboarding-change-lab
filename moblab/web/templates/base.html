@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Lab{% endblock %} · Merchant Onboarding Policy Change Lab</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="synthetic-banner" role="note">Synthetic learning prototype · fictional policies, companies, people and documents · not a KYC, legal, compliance or eligibility assessment</div>
+<header class="site">
+  <div class="brand"><a href="{{ url_for('ui.home') }}">Merchant Onboarding <span>Policy Change Lab</span></a></div>
+  {% set nav = [('ui.home', 'Overview'), ('ui.demo', 'Guided demo'), ('ui.cases', 'Cases'), ('ui.policy', 'Policy change'), ('ui.uat', 'UAT evidence'), ('ui.timeline', 'Audit timeline'), ('ui.lab', 'Lab controls')] %}
+  <nav aria-label="Main">
+    {% for endpoint, label in nav %}<a href="{{ url_for(endpoint) }}"{% if request.endpoint == endpoint %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+  </nav>
+</header>
+{% if lab %}
+<section class="labbar" aria-label="Lab state">
+  <div class="facts">
+    <span>Lab business date <strong data-testid="business-date">{{ lab.business_date }}</strong></span>
+    <span>Effective policy <strong data-testid="effective-policy">{{ lab.effective_policy or 'none' }}</strong>{% if lab.effective_from %} <span class="muted">(since {{ lab.effective_from }})</span>{% endif %}</span>
+  </div>
+  <form method="post" action="{{ url_for('ui.set_actor') }}" class="actor-switch">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {# A page rendered by a refused POST must not send the switch back to that POST-only URL (DEF-006). #}
+    <input type="hidden" name="next" value="{% if canonical_url %}{{ canonical_url }}{% elif request.method == 'GET' %}{{ request.path }}{% if request.query_string %}?{{ request.query_string.decode('ascii', 'replace') }}{% endif %}{% else %}/{% endif %}">
+    <label for="actor-select" class="nowrap">Acting as</label>
+    <select id="actor-select" name="actor_id" data-testid="actor-select">
+      {% if not current_actor %}<option value="">— choose a synthetic actor —</option>{% endif %}
+      {% for a in actors.values() %}
+      <option value="{{ a.id }}"{% if current_actor and current_actor.id == a.id %} selected{% endif %}>{{ a.display_name }} — {{ a.title }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="small" data-testid="actor-switch">Switch</button>
+  </form>
+</section>
+{% endif %}
+<main id="main">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="callout {{ 'ok' if category == 'success' else 'info' }} flash" role="status" data-testid="flash">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+<footer>
+  Independent synthetic prototype v{{ app_version }} · runs only on 127.0.0.1 · "Acting as" is a lab switch, not authentication ·
+  Implemented and tested by Claude (AI), independently reviewed by Codex (AI), directed by Herui (learning).
+</footer>
+</body>
+</html>

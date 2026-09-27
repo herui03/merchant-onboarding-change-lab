@@ -1,0 +1,14 @@
+[project]
+name = "merchant-onboarding-change-lab"
+version = "1.0.0"
+description = "Synthetic BA/UAT case study: merchant onboarding workflow with a fictional policy change"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "req(*ids): requirement IDs covered by this test",
+  "ac(*ids): acceptance scenario IDs covered by this test",
+  "e2e: real Chromium browser test against a live local server",
+]
+addopts = "-ra"

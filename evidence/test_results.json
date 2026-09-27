@@ -1,0 +1,1778 @@
+{
+  "generated_at_utc": "2026-09-26T21:28:56Z",
+  "git_head": "6a6be96e4459929e7b77ea547f192c3cfc84bf2e",
+  "git_worktree_dirty": false,
+  "python": "3.11.15",
+  "platform": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+  "pytest_exit_status": 0,
+  "selection": "",
+  "counts": {
+    "passed": 117
+  },
+  "results": [
+    {
+      "nodeid": "tests/e2e/test_browser_story.py::test_before_after_story_in_chromium",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 10.7113,
+      "req": [
+        "REQ-POL-04",
+        "REQ-POL-05",
+        "REQ-POL-06",
+        "REQ-WF-04",
+        "REQ-DEC-01",
+        "REQ-DEC-03",
+        "REQ-ROLE-02",
+        "REQ-NFR-09",
+        "REQ-NFR-02",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-21",
+        "AC-22",
+        "AC-08"
+      ],
+      "e2e": true,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/e2e/test_browser_story.py::test_every_page_fits_narrow_and_desktop_without_console_errors",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 8.6735,
+      "req": [
+        "REQ-NFR-09",
+        "REQ-NFR-05"
+      ],
+      "ac": [
+        "AC-21",
+        "AC-18"
+      ],
+      "e2e": true,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/e2e/test_browser_story.py::test_demo_script_main_path_in_one_window",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 1.8675,
+      "req": [
+        "REQ-POL-05",
+        "REQ-WF-04",
+        "REQ-DEC-01",
+        "REQ-POL-04"
+      ],
+      "ac": [
+        "AC-21"
+      ],
+      "e2e": true,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/e2e/test_browser_story.py::test_tabs_of_one_browser_share_the_actor",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.6725,
+      "req": [
+        "REQ-ROLE-01",
+        "REQ-DEC-01"
+      ],
+      "ac": [
+        "AC-22"
+      ],
+      "e2e": true,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/e2e/test_browser_story.py::test_demo_script_optional_stale_tab_exercise",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 1.7464,
+      "req": [
+        "REQ-DEC-01"
+      ],
+      "ac": [
+        "AC-22"
+      ],
+      "e2e": true,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_concurrency.py::test_eight_concurrent_decisions_one_winner[0]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.1102,
+      "req": [
+        "REQ-DEC-03"
+      ],
+      "ac": [
+        "AC-13"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_concurrency.py::test_eight_concurrent_decisions_one_winner[1]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0596,
+      "req": [
+        "REQ-DEC-03"
+      ],
+      "ac": [
+        "AC-13"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_concurrency.py::test_eight_concurrent_decisions_one_winner[2]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0842,
+      "req": [
+        "REQ-DEC-03"
+      ],
+      "ac": [
+        "AC-13"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_concurrency.py::test_concurrent_retries_with_same_key_yield_one_decision",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0584,
+      "req": [
+        "REQ-DEC-03",
+        "REQ-DEC-04"
+      ],
+      "ac": [
+        "AC-10",
+        "AC-13"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[README.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0017,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[docs/00_scope_and_truthfulness.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0003,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[docs/01_business_context.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0002,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[docs/02_requirements.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0004,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[docs/03_assumptions_decisions.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0003,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[docs/04_data_api_contract.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0004,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[docs/05_change_request_CR-001.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0003,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[docs/06_test_evidence.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0015,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[docs/07_release_recommendation.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0004,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[docs/08_demo_script.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0004,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[docs/09_cv_templates.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0002,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[docs/defect_log.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0005,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_markdown_links_resolve[docs/zh/learning_guide_zh.md]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0007,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_readme_clone_command_is_branch_aware",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0002,
+      "req": [],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_replay_is_self_contained_and_labelled",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.157,
+      "req": [
+        "REQ-NFR-04"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_truthfulness_statements_present",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0005,
+      "req": [],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_docs.py::test_no_runtime_state_or_secrets_tracked",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0026,
+      "req": [],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_csrf_required_on_every_post",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0439,
+      "req": [
+        "REQ-NFR-03",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-19"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_host_origin_and_size_controls",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0449,
+      "req": [
+        "REQ-NFR-02",
+        "REQ-NFR-03",
+        "REQ-NFR-08"
+      ],
+      "ac": [
+        "AC-19"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_server_binds_localhost_5058_only",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0002,
+      "req": [
+        "REQ-NFR-02"
+      ],
+      "ac": [
+        "AC-19"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_no_generic_status_update",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0194,
+      "req": [
+        "REQ-WF-01",
+        "REQ-WF-02"
+      ],
+      "ac": [
+        "AC-20"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_every_get_route_leaves_the_database_unchanged",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.9695,
+      "req": [
+        "REQ-NFR-05",
+        "REQ-POL-07"
+      ],
+      "ac": [
+        "AC-18"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_get_requests_use_a_query_only_connection",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0031,
+      "req": [
+        "REQ-NFR-05"
+      ],
+      "ac": [
+        "AC-18"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_hostile_text_is_escaped_and_exports_are_safe",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.1379,
+      "req": [
+        "REQ-NFR-04"
+      ],
+      "ac": [
+        "AC-17"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_api_roles_idempotency_and_cross_application",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0404,
+      "req": [
+        "REQ-DEC-04",
+        "REQ-ROLE-01",
+        "REQ-DEC-01",
+        "REQ-ROLE-03"
+      ],
+      "ac": [
+        "AC-09",
+        "AC-10",
+        "AC-11",
+        "AC-12"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_def001_huge_ids_over_http_are_404_not_500",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.1053,
+      "req": [
+        "REQ-NFR-06",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-16",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_stale_and_duplicate_form_posts",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.1486,
+      "req": [
+        "REQ-DEC-01",
+        "REQ-DEC-04",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-22",
+        "AC-10"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_self_review_and_rejected_case_via_forms",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.1022,
+      "req": [
+        "REQ-ROLE-02",
+        "REQ-DEC-03"
+      ],
+      "ac": [
+        "AC-08",
+        "AC-22"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_state_survives_app_restart",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0562,
+      "req": [
+        "REQ-NFR-01"
+      ],
+      "ac": [
+        "AC-15"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_launch_script_seeds_once_preserves_and_backs_up",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 1.691,
+      "req": [
+        "REQ-NFR-07",
+        "REQ-NFR-01"
+      ],
+      "ac": [
+        "AC-15"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_launch_script_never_installs_missing_dependencies",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0461,
+      "req": [
+        "REQ-NFR-07"
+      ],
+      "ac": [
+        "AC-15"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_seed_is_reproducible",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.1015,
+      "req": [
+        "REQ-NFR-01"
+      ],
+      "ac": [
+        "AC-15"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_launcher_on_busy_port_changes_nothing",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 2.5167,
+      "req": [
+        "REQ-NFR-07",
+        "REQ-NFR-01"
+      ],
+      "ac": [
+        "AC-15"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_cli_reset_refuses_while_a_server_holds_the_database",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.8064,
+      "req": [
+        "REQ-NFR-07"
+      ],
+      "ac": [
+        "AC-15"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_http.py::test_actor_switch_after_a_refused_post_returns_to_a_get_page",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.1457,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-21",
+        "AC-22"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_example_files_are_complete",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-01]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-02]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-03]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-04]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0002,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-05]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-06]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-07]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-08]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-09]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-10]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-11]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-12]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-13]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-14]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-15]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-16]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-17]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-18]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-19]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-20]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-21]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-22]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-23]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_policy_example_matches_hand_authored_expectation[PE-24]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02",
+        "REQ-POL-03",
+        "REQ-POL-08"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_applicability_example[PA-01]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-01",
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-03",
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_applicability_example[PA-02]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-01",
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-03",
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_applicability_example[PA-03]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-01",
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-03",
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_applicability_example[PA-04]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-01",
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-03",
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_applicability_example[PA-05]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-01",
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-03",
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_applicability_example[PA-06]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-01",
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-03",
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_applicability_example[PA-07]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-01",
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-03",
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_applicability_example[PA-08]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-01",
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-03",
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_applicability_example[PA-09]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-01",
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-03",
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_applicability_example[PA-10]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-01",
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-03",
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_evaluation_is_deterministic_and_ignores_document_order",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-03"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_policy_engine.py::test_v2_differs_from_v1_only_by_ev05",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0001,
+      "req": [
+        "REQ-POL-02"
+      ],
+      "ac": [],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_happy_path_v1",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0079,
+      "req": [
+        "REQ-INT-01",
+        "REQ-INT-02",
+        "REQ-INT-04",
+        "REQ-DEC-01",
+        "REQ-DEC-05",
+        "REQ-WF-05"
+      ],
+      "ac": [
+        "AC-01"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_missing_evidence_blocks_approval_but_not_info_request_or_rejection",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0128,
+      "req": [
+        "REQ-DEC-02",
+        "REQ-WF-03",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-02",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_effective_date_boundary_through_workflow",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0128,
+      "req": [
+        "REQ-POL-01",
+        "REQ-POL-02",
+        "REQ-POL-09"
+      ],
+      "ac": [
+        "AC-03"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_no_policy_before_first_effective_date",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0177,
+      "req": [
+        "REQ-POL-01",
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-03",
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_seed_matches_hand_authored_expectations",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.002,
+      "req": [
+        "REQ-POL-04",
+        "REQ-POL-05"
+      ],
+      "ac": [
+        "AC-04",
+        "AC-05"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_policy_migration_grandfathers_and_migrates_in_flight",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.019,
+      "req": [
+        "REQ-POL-04",
+        "REQ-POL-05",
+        "REQ-POL-07",
+        "REQ-DEC-05",
+        "REQ-WF-05"
+      ],
+      "ac": [
+        "AC-04",
+        "AC-05"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_before_after_story_service_level",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0116,
+      "req": [
+        "REQ-POL-05",
+        "REQ-WF-04",
+        "REQ-DEC-01"
+      ],
+      "ac": [
+        "AC-05",
+        "AC-06",
+        "AC-21"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_needs_information_and_resubmission_keep_history",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0103,
+      "req": [
+        "REQ-WF-03",
+        "REQ-WF-04",
+        "REQ-INT-04"
+      ],
+      "ac": [
+        "AC-06"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_stale_revision_and_stale_policy_are_refused",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.026,
+      "req": [
+        "REQ-DEC-01",
+        "REQ-POL-05",
+        "REQ-POL-09",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-07",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_callers_cannot_supply_dates",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0158,
+      "req": [
+        "REQ-POL-09",
+        "REQ-WF-02"
+      ],
+      "ac": [
+        "AC-07",
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_self_review_is_blocked",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0157,
+      "req": [
+        "REQ-ROLE-02"
+      ],
+      "ac": [
+        "AC-08"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_submitter_of_any_revision_is_excluded",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0103,
+      "req": [
+        "REQ-ROLE-02"
+      ],
+      "ac": [
+        "AC-08"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_wrong_roles_are_refused",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0345,
+      "req": [
+        "REQ-ROLE-01",
+        "REQ-ROLE-03"
+      ],
+      "ac": [
+        "AC-09"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_retry_with_same_key_replays_without_duplicates",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0094,
+      "req": [
+        "REQ-DEC-04"
+      ],
+      "ac": [
+        "AC-10"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_key_reuse_with_any_different_binding_conflicts",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0259,
+      "req": [
+        "REQ-DEC-04",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-11",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_key_binds_revision_even_with_identical_payload_fields",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0195,
+      "req": [
+        "REQ-DEC-04"
+      ],
+      "ac": [
+        "AC-11"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_cross_application_revision_and_document_ids",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0174,
+      "req": [
+        "REQ-DEC-01",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-12",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_terminal_states_are_protected_and_reopen_preserves_decision",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0465,
+      "req": [
+        "REQ-DEC-03",
+        "REQ-DEC-06",
+        "REQ-WF-01",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-14",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_invalid_dates_ids_and_contracts",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0871,
+      "req": [
+        "REQ-NFR-06",
+        "REQ-INT-01",
+        "REQ-INT-02",
+        "REQ-INT-03",
+        "REQ-INT-04"
+      ],
+      "ac": [
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_migration_failing_part_way_leaves_nothing",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0089,
+      "req": [
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_invalid_migration_requests_write_nothing",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0106,
+      "req": [
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_submitted_evidence_cannot_be_edited_in_place",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0172,
+      "req": [
+        "REQ-INT-05",
+        "REQ-WF-05",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-24",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_evidence_age_is_fixed_at_submission_date",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0083,
+      "req": [
+        "REQ-POL-08",
+        "REQ-POL-03"
+      ],
+      "ac": [
+        "AC-25"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_out_of_range_document_id_is_a_404_not_a_crash[1267650600228229401496703205376]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0049,
+      "req": [
+        "REQ-NFR-06",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-16",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_out_of_range_document_id_is_a_404_not_a_crash[2147483648]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0045,
+      "req": [
+        "REQ-NFR-06",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-16",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_out_of_range_document_id_is_a_404_not_a_crash[-1]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0046,
+      "req": [
+        "REQ-NFR-06",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-16",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_out_of_range_document_id_is_a_404_not_a_crash[0]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0046,
+      "req": [
+        "REQ-NFR-06",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-16",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_out_of_range_document_id_is_a_404_not_a_crash[True]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0045,
+      "req": [
+        "REQ-NFR-06",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-16",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_out_of_range_document_id_is_a_404_not_a_crash[1]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0045,
+      "req": [
+        "REQ-NFR-06",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-16",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_out_of_range_document_id_is_a_404_not_a_crash[1.0]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0046,
+      "req": [
+        "REQ-NFR-06",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-16",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_out_of_range_document_id_is_a_404_not_a_crash[None]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0062,
+      "req": [
+        "REQ-NFR-06",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-16",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_out_of_range_revision_and_evaluation_ids_are_422[1267650600228229401496703205376-revision_id]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.005,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_out_of_range_revision_and_evaluation_ids_are_422[1267650600228229401496703205376-evaluation_id]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0057,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_out_of_range_revision_and_evaluation_ids_are_422[2147483648-revision_id]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0047,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_out_of_range_revision_and_evaluation_ids_are_422[2147483648-evaluation_id]",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0077,
+      "req": [
+        "REQ-NFR-06"
+      ],
+      "ac": [
+        "AC-16"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    },
+    {
+      "nodeid": "tests/test_workflow_service.py::test_stale_document_removal_cannot_delete_a_replacement",
+      "outcome": "passed",
+      "phase": "call",
+      "duration_s": 0.0138,
+      "req": [
+        "REQ-INT-02",
+        "REQ-DEC-07"
+      ],
+      "ac": [
+        "AC-12",
+        "AC-23"
+      ],
+      "e2e": false,
+      "skip_reason": ""
+    }
+  ]
+}

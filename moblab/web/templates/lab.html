@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "_macros.html" import error_callout with context %}
+{% block title %}Lab controls{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Lab controls (simulation only)</h1>
+  <p>These controls exist only because this is a teaching lab. In a real system, time and identity are not user-controlled.</p>
+  {{ error_callout(error) }}
+  <div class="grid grid-2">
+    <div>
+      <h2>Business date</h2>
+      <p class="small">The server's lab date is the only date authority. It picks the effective policy, stamps submissions and decisions, and gates the migration. It only moves forward. Any actor except the read-only auditor may move it.</p>
+      <form method="post" action="{{ url_for('ui.set_clock') }}" data-testid="clock-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="next" value="{{ url_for('ui.lab') }}">
+        <div class="field"><label for="business_date">New lab date (YYYY-MM-DD)</label>
+          <input id="business_date" type="text" name="business_date" value="{{ lab.business_date }}" data-testid="clock-input"></div>
+        <button type="submit" data-testid="clock-submit">Set lab date</button>
+      </form>
+    </div>
+    <div>
+      <h2>Synthetic actors</h2>
+      <div class="table-wrap"><table class="compact">
+        <thead><tr><th>Actor</th><th>Roles</th></tr></thead>
+        <tbody>{% for a in actors.values() %}<tr><td>{{ a.display_name }}<div class="small muted">{{ a.title }}</div></td><td class="small">{% for r in a.roles %}{{ labels.roles.get(r, r) }}{% if not loop.last %}, {% endif %}{% endfor %}</td></tr>{% endfor %}</tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+<section class="card">
+  <h2>Reset and restart</h2>
+  <p>The database persists across restarts in <span class="mono">instance/merchant_onboarding_lab.db</span>. To start the demo again:</p>
+  <ol>
+    <li>Stop this server with Ctrl+C in the terminal window that runs it.</li>
+    <li>Run <span class="mono">./launch_demo.command --reset</span>.</li>
+  </ol>
+  <p class="small">Reset first copies the current database into <span class="mono">instance/backups/</span>, then creates a fresh synthetic seed. It refuses, and changes nothing, while port 5058 is busy or while any lab server holds the database. There is no reset button in the web UI.</p>
+  <p class="small">The acting actor is stored in this browser's session cookie and shared by all its tabs. Use a private/incognito window for a second, independent actor.</p>
+</section>
+{% endblock %}

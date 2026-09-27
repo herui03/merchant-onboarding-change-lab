@@ -1,0 +1,409 @@
+# Developer acceptance scenarios — hand-authored BEFORE implementation.
+#
+# These are expected outcomes for automated developer acceptance checks. They are NOT
+# external UAT: no business tester has executed them, and no signoff exists.
+#
+# Business-date authority: the server-side lab clock (meta.business_date) is the only
+# date used for policy selection, submission and decision stamps. Callers cannot supply one.
+
+[meta]
+lab_business_date_after_seed = "2026-06-24"
+v2_effective_from = "2026-07-01"
+
+# ---------------------------------------------------------------------------
+# Expected seed state (synthetic). Written before seed/engine code exists.
+# expected_migration = classification when policy owner applies v2 on/after 2026-07-01.
+# ---------------------------------------------------------------------------
+[[seed_case]]
+reference = "MOB-0001"
+legal_name = "Alder Street Bakery Ltd"
+business_identifier = "SYN-100001"
+product = "CARD_PRESENT"
+band = "V1"
+status = "approved"
+policy_version = "v1"
+evaluation_complete = true
+expected_migration = "GRANDFATHERED_APPROVED"
+v2_hypothetical_unmet = []
+purpose = "Approved under v1; v2 would not change anything anyway."
+
+[[seed_case]]
+reference = "MOB-0002"
+legal_name = "Quillon Travel Experiences Ltd"
+business_identifier = "SYN-100002"
+product = "FUTURE_DELIVERY"
+band = "V3"
+status = "approved"
+policy_version = "v1"
+evaluation_complete = true
+expected_migration = "GRANDFATHERED_APPROVED"
+v2_hypothetical_unmet = ["SERVICE_SCOPE:MISSING"]
+purpose = "Grandfathering example: would miss EV-05 under v2, but stays approved with its frozen v1 snapshot."
+
+[[seed_case]]
+reference = "MOB-0003"
+legal_name = "Larkspire Streaming Club Ltd"
+business_identifier = "SYN-100003"
+product = "SUBSCRIPTION"
+band = "V3"
+status = "submitted"
+policy_version = "v1"
+evaluation_complete = true
+expected_migration = "MIGRATED_EVIDENCE_REQUIRED"
+status_after_migration = "needs_information"
+v2_hypothetical_unmet = ["SERVICE_SCOPE:MISSING"]
+purpose = "In-flight case affected by v2: moves to needs_information with a system reason."
+
+[[seed_case]]
+reference = "MOB-0004"
+legal_name = "Tidewell Event Passes Ltd"
+business_identifier = "SYN-100004"
+product = "FUTURE_DELIVERY"
+band = "V4"
+status = "submitted"
+policy_version = "v1"
+evaluation_complete = true
+expected_migration = "MIGRATED_NO_NEW_EVIDENCE"
+status_after_migration = "submitted"
+v2_hypothetical_unmet = []
+purpose = "In-flight designated case whose revision already includes a service-scope statement issued within 90 days before its submission date."
+
+[[seed_case]]
+reference = "MOB-0005"
+legal_name = "Wrenfield Home Goods Ltd"
+business_identifier = "SYN-100005"
+product = "ECOMMERCE"
+band = "V2"
+status = "needs_information"
+policy_version = "v1"
+evaluation_complete = false
+expected_migration = "MIGRATED_PENDING_RESUBMISSION"
+status_after_migration = "needs_information"
+v2_hypothetical_unmet = ["BANK_CONFIRM:MISSING"]
+purpose = "Waiting on the specialist; v2 adds nothing for ECOMMERCE V2."
+
+[[seed_case]]
+reference = "MOB-0006"
+legal_name = "Nettlefield Fitness Memberships Ltd"
+business_identifier = "SYN-100006"
+product = "SUBSCRIPTION"
+band = "V2"
+status = "draft"
+expected_migration = "DRAFT_NOT_EVALUATED"
+status_after_migration = "draft"
+purpose = "Never submitted; it will be evaluated under whatever policy is effective on its submission date."
+
+[[seed_case]]
+reference = "MOB-0007"
+legal_name = "Vantory Gadgets Ltd"
+business_identifier = "SYN-100007"
+product = "ECOMMERCE"
+band = "V4"
+status = "rejected"
+policy_version = "v1"
+evaluation_complete = true
+expected_migration = "TERMINAL_REJECTED_UNCHANGED"
+purpose = "Terminal rejection; unaffected by migration; can only return via reasoned reopen."
+
+[[seed_case]]
+reference = "MOB-0008"
+legal_name = "Kestrelmoor Language Club Ltd"
+business_identifier = "SYN-100008"
+product = "SUBSCRIPTION"
+band = "V1"
+status = "submitted"
+policy_version = "v1"
+evaluation_complete = true
+expected_migration = "MIGRATED_NO_NEW_EVIDENCE"
+status_after_migration = "submitted"
+v2_hypothetical_unmet = []
+purpose = "Created and submitted by dual-role actor Kai; used to demonstrate the self-review block."
+
+# ---------------------------------------------------------------------------
+# Scenarios
+# ---------------------------------------------------------------------------
+[[scenario]]
+id = "AC-01"
+title = "Happy path under v1"
+requirements = ["REQ-INT-01", "REQ-INT-02", "REQ-INT-04", "REQ-DEC-01", "REQ-DEC-05", "REQ-WF-05"]
+given = "Lab date 2026-06-24 (v1 effective). Specialist Alex, reviewer Sam."
+when = "Alex creates CARD_PRESENT/V1 with REG_EXTRACT, OWNERSHIP_DECL, BANK_CONFIRM metadata and submits; Sam approves citing revision 1, v1 and its evaluation id."
+then = [
+  "Revision 1 is created with a content sha256 and a v1 evaluation marked complete.",
+  "Approval returns 201; application status = approved; one decision row bound to revision 1, policy v1 and that evaluation id.",
+  "The decision snapshot contains the revision content, the v1 rules and the evaluation, with a sha256.",
+  "Timeline shows CREATED, DOCUMENT_ADDED x3, SUBMITTED, APPROVED in order.",
+]
+
+[[scenario]]
+id = "AC-02"
+title = "Missing evidence blocks approval, not rejection"
+requirements = ["REQ-DEC-02", "REQ-WF-03"]
+given = "A submitted v1 application without BANK_CONFIRM."
+when = "Reviewer tries to approve; then requests information instead."
+then = [
+  "Approve returns 422 EVIDENCE_INCOMPLETE listing BANK_CONFIRM:MISSING; status stays submitted; no decision row and no APPROVED event.",
+  "Request-information with reason MISSING_EVIDENCE and a 20+ character message moves status to needs_information.",
+  "Rejection of an incomplete application is allowed with a reason code and a 20+ character reason.",
+]
+
+[[scenario]]
+id = "AC-03"
+title = "v2 effective-date and rule boundaries"
+requirements = ["REQ-POL-01", "REQ-POL-02", "REQ-POL-03"]
+given = "Policy examples PE-01..PE-24 and applicability examples PA-01..PA-10."
+when = "The engine evaluates each example; submissions happen on 2026-06-30 and 2026-07-01."
+then = [
+  "Every PE example matches expected_required, expected_unmet and expected_outcome exactly.",
+  "Every PA example resolves to the expected version or INVALID_DATE.",
+  "A SUBSCRIPTION/V3 submission on 2026-06-30 is evaluated under v1 (complete without SERVICE_SCOPE); the same content submitted on 2026-07-01 is evaluated under v2 (SERVICE_SCOPE:MISSING).",
+  "SUBSCRIPTION/V2 on 2026-07-01 needs no SERVICE_SCOPE.",
+]
+
+[[scenario]]
+id = "AC-04"
+title = "Grandfathering of approved v1 cases"
+requirements = ["REQ-POL-04", "REQ-DEC-05"]
+given = "Seed: MOB-0001 and MOB-0002 approved under v1."
+when = "Lab date moves to 2026-07-01 and the policy owner applies v2."
+then = [
+  "Both remain approved; their decision rows, snapshot JSON and snapshot sha256 are byte-for-byte unchanged.",
+  "No v2 evaluation is created for their revisions.",
+  "The impact view classifies both as GRANDFATHERED_APPROVED and shows MOB-0002's hypothetical v2 gap (SERVICE_SCOPE:MISSING) as not applied.",
+]
+
+[[scenario]]
+id = "AC-05"
+title = "In-flight migration rule"
+requirements = ["REQ-POL-05", "REQ-POL-07", "REQ-WF-05"]
+given = "Seed at 2026-06-24; lab date advanced to 2026-07-01 without migrating."
+when = "Reviewer tries to approve MOB-0003; policy owner previews and then applies v2; the migration is run a second time."
+then = [
+  "Approval before migration returns 409 POLICY_MIGRATION_REQUIRED; nothing is written.",
+  "Preview lists the seed_case expected_migration classifications and writes nothing.",
+  "Applying v2 before 2026-07-01 returns 409 POLICY_NOT_YET_EFFECTIVE.",
+  "After applying: MOB-0003 = needs_information with system reason POLICY_CHANGE_EVIDENCE_REQUIRED requesting SERVICE_SCOPE; MOB-0004 and MOB-0008 stay submitted with a new v2 evaluation; MOB-0005 stays needs_information with a v2 evaluation; MOB-0006 stays draft; MOB-0007 stays rejected.",
+  "The original v1 evaluations are retained; each affected case gets a POLICY_MIGRATED timeline event.",
+  "A second run changes nothing (all in-flight cases ALREADY_ON_TARGET).",
+]
+
+[[scenario]]
+id = "AC-06"
+title = "Needs information and resubmission"
+requirements = ["REQ-WF-03", "REQ-WF-04", "REQ-INT-04"]
+given = "An application in needs_information."
+when = "Specialist adds the missing metadata and resubmits with a response note; later tries to resubmit identical content."
+then = [
+  "Revision 2 is created; revision 1 content, documents, hash and evaluations are unchanged and still retrievable.",
+  "Resubmission without a response note returns 422.",
+  "Resubmitting content identical to the previous revision returns 422 NO_CHANGES_SINCE_LAST_REVISION.",
+]
+
+[[scenario]]
+id = "AC-07"
+title = "Stale approval is refused"
+requirements = ["REQ-DEC-01", "REQ-POL-05", "REQ-POL-09"]
+given = "A reviewer inspected revision 1 (v1 evaluation) before resubmission or migration."
+when = "The reviewer submits approval citing the old revision, old policy label or old evaluation id."
+then = [
+  "Old revision id after revision 2 exists: 409 STALE_REVISION.",
+  "Correct revision but superseded evaluation id or policy label: 409 STALE_POLICY_EVALUATION.",
+  "Caller-supplied policy_version = v1 after v2 is applied never selects v1 rules.",
+  "No decision row and no APPROVED event in any of these cases.",
+]
+
+[[scenario]]
+id = "AC-08"
+title = "Self-review is blocked"
+requirements = ["REQ-ROLE-02"]
+given = "MOB-0008 created and submitted by Kai, who holds both specialist and reviewer roles."
+when = "Kai tries to approve, reject or request information on MOB-0008."
+then = [
+  "Each attempt returns 403 SELF_REVIEW_FORBIDDEN and writes nothing.",
+  "A different reviewer (Sam) can decide MOB-0008.",
+]
+
+[[scenario]]
+id = "AC-09"
+title = "Wrong role via API"
+requirements = ["REQ-ROLE-01", "REQ-ROLE-03"]
+given = "Seeded actors."
+when = "A specialist posts a decision; a reviewer creates an application; the auditor posts anything; a reviewer runs migration."
+then = [
+  "Each returns 403 FORBIDDEN_ROLE and writes nothing.",
+]
+
+[[scenario]]
+id = "AC-10"
+title = "Duplicate request (retry) is idempotent"
+requirements = ["REQ-DEC-04"]
+given = "A submitted, complete application."
+when = "The same approval (same actor, same key, same payload) is posted twice."
+then = [
+  "The first returns 201; the retry returns 200 with the same decision id and replayed = true.",
+  "Exactly one decision row and one APPROVED event exist.",
+]
+
+[[scenario]]
+id = "AC-11"
+title = "Request-key reuse with a different binding fails"
+requirements = ["REQ-DEC-04"]
+given = "A key already used for an approval of application A revision R."
+when = "The key is reused with a different reason, a different outcome, a different actor, a different application or a different revision."
+then = [
+  "Each returns 409 IDEMPOTENCY_KEY_CONFLICT; nothing is written; another case's decision is never replayed.",
+]
+
+[[scenario]]
+id = "AC-12"
+title = "Cross-application revision id"
+requirements = ["REQ-DEC-01"]
+given = "Two submitted applications A and B."
+when = "A decision on A cites B's revision id; a document removal on A cites B's draft document id."
+then = [
+  "Decision returns 422 REVISION_APPLICATION_MISMATCH; document removal returns 404 NOT_FOUND; nothing is written.",
+]
+
+[[scenario]]
+id = "AC-13"
+title = "Concurrent terminal decisions"
+requirements = ["REQ-DEC-03"]
+given = "A submitted, complete application."
+when = "Eight threads on separate SQLite connections race to approve or reject it with different keys."
+then = [
+  "Exactly one succeeds; the rest get 409 ALREADY_DECIDED; exactly one decision row and one terminal event exist.",
+]
+
+[[scenario]]
+id = "AC-14"
+title = "Terminal-state protection and reasoned reopen"
+requirements = ["REQ-DEC-03", "REQ-DEC-06", "REQ-WF-01"]
+given = "An approved and a rejected application."
+when = "Anyone tries approve, reject, request-information, submit or draft edits on them; a reviewer reopens the rejected one."
+then = [
+  "Commands on terminal applications return 409 ALREADY_DECIDED (or INVALID_TRANSITION for draft edits) and write nothing.",
+  "A rejected application can never be approved directly.",
+  "Reopen requires a 20+ character reason, is refused for approved applications, and starts a new draft cycle; the original rejection decision is unchanged.",
+  "The next submission becomes a new revision that can be decided on its own.",
+]
+
+[[scenario]]
+id = "AC-15"
+title = "Restart and launch-script persistence"
+requirements = ["REQ-NFR-01", "REQ-NFR-07"]
+given = "A named database with a changed case."
+when = "The app is recreated on the same file; the launch script runs in check-only mode with and without an existing database; reset is requested."
+then = [
+  "All state survives the restart.",
+  "The launch script preserves an existing database and seeds only when it is missing.",
+  "Reset copies the old database into instance/backups/ before reseeding.",
+  "Missing dependencies produce exact instructions and a non-zero exit; nothing is installed.",
+]
+
+[[scenario]]
+id = "AC-16"
+title = "Invalid dates and identifiers"
+requirements = ["REQ-NFR-06", "REQ-INT-01", "REQ-POL-01"]
+given = "Seeded app."
+when = "Invalid inputs are sent."
+then = [
+  "Clock 2026-02-30 / 2026-7-1 / backwards date: 422; clock unchanged.",
+  "Document issued_on invalid: 422; issued after the business date: 422 FUTURE_DATED_DOCUMENT at submission.",
+  "Unknown reference MOB-9999: 404; malformed reference or non-integer revision id: 404/422, never 500.",
+  "Business identifier not matching SYN-######: 422; duplicate identifier: 409.",
+  "Unknown fields such as status, business_date or submitted_on: 422.",
+]
+
+[[scenario]]
+id = "AC-17"
+title = "Safe rendering and export"
+requirements = ["REQ-NFR-04"]
+given = "Application text containing <script>, HTML attributes and spreadsheet formulas."
+when = "Pages render and the CSV/JSON exports are downloaded."
+then = [
+  "HTML shows the text escaped; no injected element exists in the DOM.",
+  "CSV cells beginning with = + - @ tab or carriage return are prefixed with a single quote.",
+  "JSON export is application/json with the text as data.",
+]
+
+[[scenario]]
+id = "AC-18"
+title = "Read-only pages do not mutate"
+requirements = ["REQ-NFR-05", "REQ-POL-07"]
+given = "Seeded database."
+when = "Every GET page and API endpoint, including the migration preview and exports, is requested."
+then = ["The database fingerprint (all table contents) is identical before and after."]
+
+[[scenario]]
+id = "AC-19"
+title = "CSRF, origin and localhost controls"
+requirements = ["REQ-NFR-02", "REQ-NFR-03", "REQ-NFR-08"]
+given = "Running app."
+when = "POSTs arrive without a token, with a foreign Origin, with a foreign Host, or larger than 64 KB."
+then = [
+  "403 CSRF_FAILED, 403 ORIGIN_NOT_ALLOWED, 400 HOST_NOT_ALLOWED and 413 respectively; nothing is written.",
+  "The server binds 127.0.0.1:5058.",
+]
+
+[[scenario]]
+id = "AC-20"
+title = "No status bypass"
+requirements = ["REQ-WF-01", "REQ-WF-02"]
+given = "A submitted application."
+when = "Clients send PATCH/PUT to the application or include status in a payload."
+then = ["PATCH/PUT: 405; status in payload: 422; status unchanged."]
+
+[[scenario]]
+id = "AC-21"
+title = "Browser before/after story"
+requirements = ["REQ-POL-04", "REQ-POL-05", "REQ-POL-06", "REQ-WF-04", "REQ-DEC-01", "REQ-NFR-09"]
+given = "Fresh seeded server in Chromium."
+when = "Follow the guided demo: inspect MOB-0003 under v1, move to 2026-07-01, see the approval blocked, apply v2 as policy owner, add the service-scope statement and resubmit as specialist, approve as reviewer."
+then = [
+  "Each step shows the documented status and banner; MOB-0003 ends approved under v2 revision 2; MOB-0002 remains approved under v1.",
+  "Screenshots at desktop and narrow width show no horizontal overflow and no console errors.",
+]
+
+[[scenario]]
+id = "AC-22"
+title = "Stale and rejected browser actions"
+requirements = ["REQ-DEC-01", "REQ-DEC-03"]
+given = "Two browser contexts acting as different reviewers."
+when = "A decision form opened before a resubmission is submitted afterwards; a reviewer approves a case another reviewer already rejected."
+then = [
+  "The browser shows STALE_REVISION or ALREADY_DECIDED with an explanation; the database is unchanged by those attempts.",
+]
+
+[[scenario]]
+id = "AC-23"
+title = "No partial writes on failure"
+requirements = ["REQ-DEC-07"]
+given = "Row counts of decisions, events, evaluations, migration runs and idempotency records."
+when = "Invalid approvals and migrations fail validation, and a migration fails part-way through."
+then = [
+  "Counts are unchanged after every failure; no success audit event exists for a failed command.",
+]
+
+[[scenario]]
+id = "AC-24"
+title = "No in-place evidence edits on a submitted revision"
+requirements = ["REQ-INT-05"]
+given = "A submitted revision under review."
+when = "Someone edits draft evidence while submitted, updates revision rows directly, or tampers with a revision after bypassing the trigger."
+then = [
+  "Draft edits while submitted: 409 INVALID_TRANSITION.",
+  "Direct UPDATE/DELETE on revision, revision document, evaluation, decision or event rows is aborted by the database.",
+  "If content is tampered with anyway, approval returns 409 REVISION_INTEGRITY_FAILURE.",
+]
+
+[[scenario]]
+id = "AC-25"
+title = "Evidence age is fixed at the submission date"
+requirements = ["REQ-POL-08"]
+given = "A v2 revision submitted on 2026-07-02 with a SERVICE_SCOPE statement issued 2026-04-10 (83 days old as of submission)."
+when = "The lab clock advances to 2026-09-30 (well past 90 days after issue) under the same policy; the case is re-read, previewed and approved."
+then = [
+  "The stored evaluation is unchanged (same id, result and sha256) and still shows EV-05 SATISFIED with 'age 83 days as of submitted 2026-07-02'.",
+  "No new evaluation is created by advancing the clock, reading pages or previewing migration.",
+  "Approval succeeds against that evaluation. Wanting a more recent statement requires a reviewer information request and a new revision.",
+]

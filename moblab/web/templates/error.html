@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% from "_macros.html" import error_callout with context %}
+{% block title %}{{ error.code }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>{{ error.http_status }} · {{ error.code }}</h1>
+  {{ error_callout(error) }}
+  <p><a href="{{ url_for('ui.home') }}">Back to the overview</a> · <a href="{{ url_for('ui.cases') }}">Case list</a></p>
+</div>
+{% endblock %}

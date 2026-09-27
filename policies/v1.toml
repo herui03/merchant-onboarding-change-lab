@@ -1,0 +1,31 @@
+# Fictional policy — invented for a synthetic case study. Not a legal or regulatory rule.
+version = "v1"
+title = "Corporate Merchant Evidence Policy v1 (fictional)"
+effective_from = "2026-01-01"
+change_request = ""
+summary = "Baseline evidence for every corporate merchant; processing history for the top volume band."
+
+[[rules]]
+id = "EV-01"
+name = "Business registration extract"
+doc_type = "REG_EXTRACT"
+rationale = "Confirms the synthetic business identifier belongs to the applying entity."
+
+[[rules]]
+id = "EV-02"
+name = "Beneficial ownership declaration"
+doc_type = "OWNERSHIP_DECL"
+rationale = "Records who owns and controls the applying entity (synthetic declaration)."
+
+[[rules]]
+id = "EV-03"
+name = "Settlement bank account confirmation"
+doc_type = "BANK_CONFIRM"
+rationale = "Confirms where settlement funds would be paid."
+
+[[rules]]
+id = "EV-04"
+name = "Prior processing history"
+doc_type = "PROCESSING_HISTORY"
+volume_bands = ["V4"]
+rationale = "Top-band merchants show six months of prior card processing statements."

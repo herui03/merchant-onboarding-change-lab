@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Audit timeline{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Audit timeline</h1>
+  <p class="small muted">Append-only event log, newest first. The database refuses to update or delete events. Refused commands write nothing, so they do not appear here (DEC-06).</p>
+  <div class="table-wrap">
+  <table data-testid="audit-table">
+    <thead><tr><th>#</th><th>Business date</th><th>Case</th><th>Event</th><th>Actor</th><th>Detail</th></tr></thead>
+    <tbody>
+    {% for e in events %}
+      <tr><td>{{ e.id }}</td><td class="nowrap">{{ e.business_date }}</td>
+        <td class="nowrap">{% if e.reference %}<a href="{{ url_for('ui.case', reference=e.reference) }}">{{ e.reference }}</a>{% else %}<span class="muted">lab</span>{% endif %}</td>
+        <td class="mono small">{{ e.event_type }}{% if e.reason_code %}<div class="muted">{{ e.reason_code }}</div>{% endif %}</td>
+        <td>{{ actors[e.actor_id].display_name if e.actor_id else '—' }}</td>
+        <td class="small">{{ e.message }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endblock %}

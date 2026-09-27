@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "_macros.html" import error_callout, field_error, hidden_common with context %}
+{% block title %}New application{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>New corporate merchant application</h1>
+  <p class="muted small">Synthetic data only. The business identifier must be <span class="mono">SYN-</span> plus 6 digits, so real registry numbers cannot be entered. Evidence is added as document metadata after the draft is created.</p>
+  {% if not current_actor or 'onboarding_specialist' not in current_actor.roles %}
+  <div class="callout warn">This needs the <strong>Onboarding specialist</strong> role. Switch actor above (for example Alex Rivera). The server refuses the request otherwise.</div>
+  {% endif %}
+  {{ error_callout(error) }}
+  <form method="post" action="{{ url_for('ui.create_case') }}" data-testid="new-case-form">
+    {{ hidden_common(key) }}
+    <div class="grid grid-2">
+      <div class="field"><label for="legal_name">Legal name</label>
+        <input type="text" id="legal_name" name="legal_name" maxlength="120" value="{{ form.get('legal_name', '') }}">
+        <div class="hint">2–120 characters: letters, digits, spaces and &amp; ' . , ( ) - /</div>{{ field_error(error, 'legal_name') }}</div>
+      <div class="field"><label for="business_identifier">Synthetic business identifier</label>
+        <input type="text" id="business_identifier" name="business_identifier" placeholder="SYN-123456" value="{{ form.get('business_identifier', '') }}">
+        <div class="hint">Format SYN-######. Unique, and fixed after creation.</div>{{ field_error(error, 'business_identifier') }}</div>
+      <div class="field"><label for="product_category">Product category</label>
+        <select id="product_category" name="product_category">
+          {% for k, v in labels.products.items() %}<option value="{{ k }}"{% if form.get('product_category') == k %} selected{% endif %}>{{ k }} — {{ v }}</option>{% endfor %}
+        </select>{{ field_error(error, 'product_category') }}</div>
+      <div class="field"><label for="volume_band">Declared monthly volume band</label>
+        <select id="volume_band" name="volume_band">
+          {% for k, v in labels.bands.items() %}<option value="{{ k }}"{% if form.get('volume_band') == k %} selected{% endif %}>{{ k }} — {{ v }}</option>{% endfor %}
+        </select>{{ field_error(error, 'volume_band') }}</div>
+    </div>
+    <div class="field"><label for="activity_summary">Activity summary (optional)</label>
+      <textarea id="activity_summary" name="activity_summary" maxlength="400">{{ form.get('activity_summary', '') }}</textarea>
+      <div class="hint">Up to 400 characters. Shown as plain text.</div>{{ field_error(error, 'activity_summary') }}</div>
+    <button type="submit" data-testid="create-case">Create draft</button>
+  </form>
+</section>
+{% endblock %}

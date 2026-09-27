@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge with context %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<div class="hero">
+  <section class="card">
+    <h1>Merchant Onboarding Policy Change Lab</h1>
+    <p class="muted">Business Analyst &amp; UAT case study — an independent, synthetic workflow prototype.</p>
+    <p>A fictional payment provider, <strong>Fernhill Payments (invented)</strong>, onboards corporate merchants. An onboarding
+      specialist prepares an application with document <em>metadata</em>. A risk reviewer inspects an immutable submitted
+      revision against the evidence policy, then requests information, approves or rejects it.</p>
+    <p><strong>The business change (CR-001):</strong> from <strong>2026-07-01</strong>, evidence policy <strong>v2</strong> requires a
+      <em>service-scope statement</em> for designated deferred-delivery products (SUBSCRIPTION, FUTURE_DELIVERY) in the elevated
+      volume bands V3/V4. The statement must be issued within 90 days before the revision's submission date.
+      Approved v1 cases are grandfathered. In-flight cases follow an explicit migration rule, and a stale reviewer action fails.</p>
+    <div class="row">
+      <a class="button" href="{{ url_for('ui.demo') }}" data-testid="start-demo">Start the guided demo</a>
+      <a class="button secondary" href="{{ url_for('ui.policy') }}">See the policy change</a>
+      <a class="button secondary" href="{{ url_for('ui.uat') }}">UAT evidence</a>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Portfolio right now</h2>
+    <div class="grid grid-2">
+      <div><div class="stat" data-testid="count-total">{{ counts.total }}</div><div class="stat-label">applications</div></div>
+      <div><div class="stat">{{ counts.submitted }}</div><div class="stat-label">in review</div></div>
+      <div><div class="stat">{{ counts.needs_information }}</div><div class="stat-label">needs information</div></div>
+      <div><div class="stat">{{ counts.approved }}/{{ counts.rejected }}</div><div class="stat-label">approved / rejected</div></div>
+    </div>
+    <hr>
+    <p class="small muted">Everything is stored in a local SQLite file and persists across restarts. Change the lab date and actor from the bar above.</p>
+  </section>
+</div>
+
+<div class="grid grid-3">
+  <section class="card">
+    <h3>What is real here</h3>
+    <ul class="small">
+      <li>A working state machine with immutable revisions and decisions.</li>
+      <li>Server-side role and self-review checks, idempotent requests and stale-action refusal.</li>
+      <li>A policy engine that matches 24 hand-authored examples written before the code.</li>
+      <li>Automated service tests and a Chromium browser run that produced the evidence.</li>
+    </ul>
+  </section>
+  <section class="card">
+    <h3>What is invented</h3>
+    <ul class="small">
+      <li>Policies, thresholds, companies, people and documents. The identifiers are <span class="mono">SYN-…</span>.</li>
+      <li>Business context and assumptions. They were authored, not gathered in stakeholder interviews.</li>
+      <li>"Acting as" is a lab switch, not authentication.</li>
+    </ul>
+  </section>
+  <section class="card">
+    <h3>What has not happened</h3>
+    <ul class="small">
+      <li>External UAT and business signoff. Only developer acceptance checks exist.</li>
+      <li>Any real KYC, legal or compliance assessment.</li>
+      <li>Deployment. The app binds to 127.0.0.1 only.</li>
+    </ul>
+  </section>
+</div>
+
+<section class="card">
+  <div class="spread"><h2>Cases</h2><a href="{{ url_for('ui.cases') }}">Open the case list →</a></div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Case</th><th>Merchant (synthetic)</th><th>Product / band</th><th>Status</th><th>Policy</th></tr></thead>
+    <tbody>
+    {% for a in apps %}
+      <tr>
+        <td class="nowrap"><a href="{{ url_for('ui.case', reference=a.reference) }}">{{ a.reference }}</a></td>
+        <td>{{ a.legal_name }}</td>
+        <td class="mono small">{{ a.product_category }} / {{ a.volume_band }}</td>
+        <td>{{ status_badge(a.status) }}{% if a.grandfathered %} <span class="badge grand">grandfathered</span>{% endif %}{% if a.migration_required %} <span class="badge warn">migration required</span>{% endif %}</td>
+        <td class="mono">{{ a.policy_version or '—' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endblock %}
